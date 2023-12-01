@@ -1,0 +1,19 @@
+{
+  "name": "aoc23",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Typescript Solutions for Advent of Code 2023",
+  "author": "HomoCodens <homocodens@github.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "inquirer": "^9.2.12",
+    "xstate": "^5.0.0-beta.54"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.1",
+    "@types/inquirer": "^9.0.7"
+  }
+}
