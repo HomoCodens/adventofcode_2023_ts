@@ -27,6 +27,8 @@ export default class Scaffolder {
         fs.writeFileSync(solver, `import SolverBase, { Solvution } from './solverbase'
         
 export default class SolverDay${dayPadded} extends SolverBase<T> {
+    static override day = ${day}
+
     prepareInput(rawInput: string): T {
         return rawInput.trim().split('\\n')
     }
@@ -56,8 +58,8 @@ export default class SolverDay${dayPadded} extends SolverBase<T> {
         let indexContent = fs.readFileSync(index).toString()
 
         indexContent = indexContent.replace(
-            /\n\nexport \{([^]+)\}/,
-            `\nimport SolverDay${dayPadded} from './solverday${dayPadded}'\n\nexport \{$1    SolverDay${dayPadded},\n\}`)
+            /\n\nconst Solvers = \[([^]+)\]/,
+            `\nimport SolverDay${dayPadded} from './solverday${dayPadded}'\n\nconst Solvers \[$1    SolverDay${dayPadded},\n\]`)
 
         fs.writeFileSync(index, indexContent)
 

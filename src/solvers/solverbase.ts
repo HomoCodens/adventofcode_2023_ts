@@ -21,6 +21,8 @@ export class Solvution {
 }
 
 export default abstract class SolverBase<T> {
+    static day: number
+
     abstract prepareInput(rawInput: string): T
 
     async getSolutionOne(rawInput: string): Promise<Solvution> {

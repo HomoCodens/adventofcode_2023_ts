@@ -46,6 +46,8 @@ type Schematic = {
 }
 
 export default class SolverDay03 extends SolverBase<Schematic> {
+    static override day = 3
+
     prepareInput(rawInput: string): Schematic {
         const lines = rawInput.trim()
                                 .split('\n')
