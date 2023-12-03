@@ -75,11 +75,13 @@ export default class SolverDay02 extends SolverBase<CoobGame[]> {
     prepareInput(rawInput: string): CoobGame[] {
         return rawInput.trim().split('\n').map(CoobGame.fromString)
     }
+
     solvePartOne(input: CoobGame[]): Solvution {
         return new Solvution(
             input.filter((g) => g.izLeegl(12, 13, 14)).reduce((acc: number, g: CoobGame) => acc + g.id, 0)
         )
     }
+    
     solvePartTwo(input: CoobGame[]): Solvution {
         return new Solvution(
             input.map((g) => g.gitMaximinPower()).reduce((acc, p) => acc + p)

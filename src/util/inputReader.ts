@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import path from 'path'
+import { padNumber } from './helpers'
 
 export class InputReader {
     private root: string
@@ -11,7 +12,7 @@ export class InputReader {
     readInput(day: number): string {
         return this.read(path.join(
             this.root,
-            `day${this.padNumber(day)}`,
+            `day${padNumber(day)}`,
             'input.txt'
         ))
     }
@@ -22,22 +23,18 @@ export class InputReader {
             this.read(
                 path.join(
                     this.root,
-                    `day${this.padNumber(day)}`,
-                    `example${this.padNumber(example)}.txt`
+                    `day${padNumber(day)}`,
+                    `example${padNumber(example)}.txt`
                 )
             ),
             this.read(
                 path.join(
                     this.root,
-                    `day${this.padNumber(day)}`,
-                    `example${this.padNumber(example)}.solution.txt`
+                    `day${padNumber(day)}`,
+                    `example${padNumber(example)}.solution.txt`
                 )
             )
         ]
-    }
-    
-    private padNumber(x: number): string {
-        return `${x.toString().padStart(2, '0')}`
     }
 
     private read(path: string): string {
