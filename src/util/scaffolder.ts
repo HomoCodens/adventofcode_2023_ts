@@ -60,5 +60,10 @@ export default class SolverDay${dayPadded} extends SolverBase<T> {
             `\nimport SolverDay${dayPadded} from './solverday${dayPadded}'\n\nexport \{$1    SolverDay${dayPadded},\n\}`)
 
         fs.writeFileSync(index, indexContent)
+
+        fs.mkdirSync(path.join(this.root, 'input', `day{${dayPadded}}`))
+        fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'example01.txt'), '')
+        fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'example01.solution.txt'), '')
+        fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'input.txt'), '')
     }
 }
