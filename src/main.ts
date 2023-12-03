@@ -92,6 +92,9 @@ const d03 = new Solvers.SolverDay03()
 d03.getSolutionOne(ir.readExample(3, 1)[0]).then(console.log).catch((e) => {
     console.log(e)
 })
+d03.getSolutionTwo(ir.readExample(3, 1)[0]).then(console.log).catch((e) => {
+    console.log(e)
+})
 
 d03.getSolutionOne(ir.readInput(3)).then(console.log)
-//d03.getSolutionTwo(ir.readInput(3)).then(console.log)
+d03.getSolutionTwo(ir.readInput(3)).then(console.log)

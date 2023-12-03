@@ -1,48 +1,96 @@
 import SolverBase, { Solvution } from './solverbase'
-        
-export default class SolverDay03 extends SolverBase<string[]> {
-    prepareInput(rawInput: string): string[] {
-        return rawInput.trim().split('\n')
+
+class NumberToken {
+    value: number
+    line: number
+    col: number
+    length: number
+
+    static Null = new NumberToken(-1, -1, -1, -1)
+
+    constructor(value: number, line: number, col: number, length: number) {
+        this.value = value
+        this.line = line
+        this.col = col
+        this.length = length
     }
 
-    solvePartOne(input: string[]): Solvution {
+    adjacentTo(symbol: SymbolToken): boolean {
+        // "rect contains"
+        return (symbol.line >= this.line - 1 && symbol.line <= this.line + 1) &&
+                (symbol.col >= this.col - 1 && symbol.col <= this.col + this.length)
+    }
+}
+
+class SymbolToken {
+    value: string
+    line: number
+    col: number
+
+    static Null = new SymbolToken('', -1, -1)
+
+    constructor(value: string, line: number, col: number) {
+        this.value = value
+        this.line = line
+        this.col = col
+    }
+
+    adjacentTo(num: NumberToken): boolean {
+        return num.adjacentTo(this)
+    }
+}
+
+type Schematic = {
+    numberTokens: NumberToken[],
+    symbolTokens: SymbolToken[],
+}
+
+export default class SolverDay03 extends SolverBase<Schematic> {
+    prepareInput(rawInput: string): Schematic {
+        const lines = rawInput.trim()
+                                .split('\n')
+        
+        const numberTokens = lines.flatMap((line, lineNo) => 
+                                [...line.matchAll(/\d+/g)].map((match) => {
+                                    if(match.index !== undefined) {
+                                        return new NumberToken(+match[0], lineNo, match.index, match[0].length)
+                                    } else {
+                                        // can't happen, pleasing the compailer
+                                        return NumberToken.Null
+                                    }
+                                })
+                             )
+
+        const symbolTokens = lines.flatMap((line, lineNo) => 
+                                [...line.matchAll(/[^\d.]/g)].map((match) => {
+                                    if(match.index !== undefined) {
+                                        return new SymbolToken(match[0], lineNo, match.index)
+                                    } else {
+                                        return SymbolToken.Null
+                                    }
+                                })
+        )
+
+        return {
+            numberTokens,
+            symbolTokens
+        }
+    }
+
+    solvePartOne(input: Schematic): Solvution {
         return new Solvution(
-            input.map((line, i, lines) => {
-                const numberMatches = [...line.matchAll(/\d+/g)]
-                                        .filter((match) => this.hazSymbol(match, i, lines))
-                                        .map((x) => +x[0])
-                console.log(numberMatches)
-                if(numberMatches.length === 0) {
-                    return 0
-                }
-                
-                return numberMatches.reduce((a, b) => a + b)
-            }).reduce((a, b) => a + b)            
+            input.numberTokens.filter((number) => input.symbolTokens.some((symbol) => number.adjacentTo(symbol)))
+                .reduce((acc: number, { value }: NumberToken) => acc + value, 0)
         )
     }
     
-    solvePartTwo(input: string[]): Solvution {
+    solvePartTwo(input: Schematic): Solvution {
         return new Solvution(
-            'Answer goes here'
+            input.symbolTokens.filter(({ value }) => value === '*')
+                    .map((symbol) => input.numberTokens.filter((number) => symbol.adjacentTo(number)))
+                    .filter((numbers) => numbers.length === 2)
+                    .reduce((acc, numbers) => acc + numbers[0].value*numbers[1].value, 0)
         )
-    }
-
-    private hazSymbol(match: RegExpMatchArray, lineNo: number, lines: string[]) {
-        if(match.index === undefined || match.input === undefined) {
-            return false
-        }
-
-        console.log(match)
-
-        return this.stringHazSymbol(match.input.substring(match.index - 1, match.index + match[0].length + 1)) ||
-                (lineNo > 0 && this.stringHazSymbol(lines[lineNo - 1].substring(match.index - 1, match.index  +  match[0].length + 1))) ||
-                (lineNo < (lines.length - 1) && this.stringHazSymbol(lines[lineNo + 1].substring(match.index - 1, match.index + match[0].length + 1)))
-    }
-
-    private stringHazSymbol(str: string) {
-        console.log(`testing ${str}`)
-        console.log(`methinks ${/[^\d\.]/.test(str)}`)
-        return /[^\d.]/.test(str)
     }
 }
         
