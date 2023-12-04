@@ -1,4 +1,4 @@
-import { createMachine, fromPromise, log, sendTo } from 'xstate'
+import { assign, createMachine, fromPromise, log, sendTo } from 'xstate'
 import { chooseDay, mainMenu } from './menus'
 import Solvers from '../solvers'
 import { InputReader } from './inputReader'
@@ -8,6 +8,7 @@ export const aocMachine = createMachine({
     initial: 'menu',
     context: {
         inputRoot: './input',
+        activeDay: 0,
     },
     states: {
         menu: {
@@ -37,27 +38,37 @@ export const aocMachine = createMachine({
                     },
                     invoke: {
                         src: chooseDay,
+                        input: ({ context }) => {
+                            return {
+                                activeDay: context.activeDay
+                            }
+                        },
                         onDone: {
-                            actions: sendTo(({ self }) => self, ({ event }) => {
-                                return {
-                                    type: event.output.transition,
-                                    params: event.output.params
-                                }
-                            })
-                        }
-                    }
+                            actions: [
+                                sendTo(({ self }) => self, ({ event }) => {
+                                    return {
+                                        type: event.output.transition,
+                                        params: event.output.params
+                                    }
+                                }),
+                            ],
+                        },
+                    },
                 },
             },
         },
         running: {
             initial: '#runSingleDay',
+            entry: [
+                assign({
+                    activeDay: ({ event }) => event.params.dayToRun - 1,
+                }),
+            ],
             states: {
                 runSingleDay: {
                     id: 'runSingleDay',
-                    entry: log(({ event }) => event),
                     invoke: {
                         src: fromPromise(({ input }) => {
-                            console.log(input)
                             const solver = new Solvers[input.day - 1]
                             const inputReader = new InputReader(input.inputFileRoot)
                             return Promise.all([

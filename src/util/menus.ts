@@ -24,22 +24,36 @@ export const mainMenu = fromPromise(() => {
     ])
 })
 
-export const chooseDay = fromPromise(() => {
-    const choices = Solvers.map(({ day }) => ({ name: `Day ${day}`, value: day}))
+export const chooseDay = fromPromise(({ input: { activeDay } }) => {
+    const choices = [
+        ...Solvers.map(({ day }) => ({ name: `Day ${day}`, value: day})),
+        new inquirer.Separator(),
+        {
+            name: 'Back',
+            value: 'MAINMENU'
+        }
+    ]
+    
     return inquirer.prompt([
         {
             type: 'list',
-            name: 'day',
+            name: 'choice',
             message: 'Run a day',
             prefix: '📅',
-            choices
+            choices,
+            default: activeDay,
         }
     ]).then((choice) => {
-        console.log(choice)
+        if(choice.choice === 'MAINMENU') {
+            return {
+                transition: 'MAINMENU'
+            }
+        }
+
         return {
             transition: 'RUNDAY',
             params: {
-                dayToRun: choice.day
+                dayToRun: choice.choice
             }
         }
     })
