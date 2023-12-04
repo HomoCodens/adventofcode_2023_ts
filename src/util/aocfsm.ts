@@ -60,7 +60,12 @@ export const aocMachine = createMachine({
                             console.log(input)
                             const solver = new Solvers[input.day - 1]
                             const inputReader = new InputReader(input.inputFileRoot)
-                            return solver.getSolutionOne(inputReader.readExample(input.day, 1)[0]).then(console.log)
+                            return Promise.all([
+                                solver.getSolutionOne(inputReader.readExample(input.day, 1)[0]),
+                                solver.getSolutionTwo(inputReader.readExample(input.day, 1)[0]),
+                                solver.getSolutionOne(inputReader.readInput(input.day)),
+                                solver.getSolutionTwo(inputReader.readInput(input.day)),
+                            ]).then(console.log)
                         }),
                         input: ({ event, context }) => {
                             return {

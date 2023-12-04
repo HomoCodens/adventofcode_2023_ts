@@ -26,20 +26,20 @@ export default class Scaffolder {
 
         fs.writeFileSync(solver, `import SolverBase, { Solvution } from './solverbase'
         
-export default class SolverDay${dayPadded} extends SolverBase<T> {
+export default class SolverDay${dayPadded} extends SolverBase<TInput> {
     static override day = ${day}
 
-    prepareInput(rawInput: string): T {
+    prepareInput(rawInput: string): TInput {
         return rawInput.trim().split('\\n')
     }
 
-    solvePartOne(input: T): Solvution {
+    solvePartOne(input: TInput): Solvution {
         return new Solvution(
             'Answer goes here'
         )
     }
     
-    solvePartTwo(input: T): Solvution {
+    solvePartTwo(input: TInput): Solvution {
         return new Solvution(
             'Answer goes here'
         )
@@ -59,11 +59,11 @@ export default class SolverDay${dayPadded} extends SolverBase<T> {
 
         indexContent = indexContent.replace(
             /\n\nconst Solvers = \[([^]+)\]/,
-            `\nimport SolverDay${dayPadded} from './solverday${dayPadded}'\n\nconst Solvers \[$1    SolverDay${dayPadded},\n\]`)
+            `\nimport SolverDay${dayPadded} from './solverday${dayPadded}'\n\nconst Solvers = \[$1    SolverDay${dayPadded},\n\]`)
 
         fs.writeFileSync(index, indexContent)
 
-        fs.mkdirSync(path.join(this.root, 'input', `day{${dayPadded}}`))
+        fs.mkdirSync(path.join(this.root, 'input', `day${dayPadded}`))
         fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'example01.txt'), '')
         fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'example01.solution.txt'), '')
         fs.writeFileSync(path.join(this.root, 'input', `day${dayPadded}`, 'input.txt'), '')
