@@ -30,7 +30,7 @@ export default class SolverDay${dayPadded} extends SolverBase<TInput> {
     static override day = ${day}
 
     prepareInput(rawInput: string): TInput {
-        return rawInput.trim().split('\\n')
+        return rawInput.lines()
     }
 
     solvePartOne(input: TInput): Solvution {
