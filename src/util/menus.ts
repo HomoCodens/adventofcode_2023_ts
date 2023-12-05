@@ -1,6 +1,7 @@
 import inquirer from 'inquirer'
 import { fromPromise } from 'xstate'
 import Solvers from '../solvers'
+import { spawn } from 'child_process'
 
 export const mainMenu = fromPromise(() => {
     return inquirer.prompt([
