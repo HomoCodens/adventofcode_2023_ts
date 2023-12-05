@@ -12,7 +12,7 @@ class MappingInterval {
     }
 
     static fromString(def: string): MappingInterval {
-        const params = def.trim().split(' ').map(Number)
+        const params = def.csvNumbers(' ')
         return new MappingInterval(params[1], params[0], params[2])
     }
 
@@ -37,7 +37,7 @@ class Mapping {
             return new Mapping('nil', [])
         }
 
-        const intervals = parts['intervals'].trim().split('\n').map(MappingInterval.fromString)
+        const intervals = parts['intervals'].lines().map(MappingInterval.fromString)
 
         return new Mapping(
             parts['type'],
@@ -72,8 +72,8 @@ class IslandAlmanac {
             return new IslandAlmanac([], [])
         }
 
-        const seeds = parts.groups['seeds'].split(' ').map(Number)
-        const mappings = parts.groups['mappings'].trim().split('\n\n').map((line) => Mapping.fromString(line.trim()))
+        const seeds = parts.groups['seeds'].csvNumbers(' ')
+        const mappings = parts.groups['mappings'].lines('\n\n').map((line) => Mapping.fromString(line.trim()))
 
         return new IslandAlmanac(seeds, mappings)
     }
@@ -100,12 +100,6 @@ class IslandAlmanac {
             }
         }
         return minLoc
-
-        let nSeeds = 0;
-        for(let i = 0; i < this.seeds.length - 1; i += 2) {
-            nSeeds += this.seeds[i + 1]
-        }
-        console.log(nSeeds)
     }
 }
 

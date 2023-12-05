@@ -67,7 +67,7 @@ class CoobGame {
             red: 0,
             green: 0,
             blue: 0
-        })).reduce((acc, x) => acc * x)
+        })).prod()
     }
 }
 
@@ -75,7 +75,7 @@ export default class SolverDay02 extends SolverBase<CoobGame[]> {
     static override day = 2
 
     prepareInput(rawInput: string): CoobGame[] {
-        return rawInput.trim().split('\n').map(CoobGame.fromString)
+        return rawInput.lines().map(CoobGame.fromString)
     }
 
     solvePartOne(input: CoobGame[]): Solvution {
@@ -86,7 +86,7 @@ export default class SolverDay02 extends SolverBase<CoobGame[]> {
 
     solvePartTwo(input: CoobGame[]): Solvution {
         return new Solvution(
-            input.map((g) => g.gitMaximinPower()).reduce((acc, p) => acc + p)
+            input.map((g) => g.gitMaximinPower()).sum()
         )
     }
 

@@ -4,7 +4,7 @@ export default class SolverDay01 extends SolverBase<string[]> {
     static override day = 1
 
     prepareInput(input: string): string[] {
-        return input.split('\n').filter(line => line.length > 0)
+        return input.lines().filter(line => line.length > 0)
     }
 
     override solvePartOne(parsedInput: string[]): Solvution {
@@ -47,7 +47,7 @@ export default class SolverDay01 extends SolverBase<string[]> {
     }
 
     private getDigitsPartOne(line: string): [number, number] {
-        const numbers = line.split('').map(Number).filter(Boolean)
+        const numbers = line.csvNumbers('')
         const nNumbers = numbers.length
         return [
             numbers[0],
