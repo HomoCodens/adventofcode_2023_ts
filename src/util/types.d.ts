@@ -1,9 +1,10 @@
 declare interface String {
     lines(delimiter: string = '\n'): string[],
-    csvNumbers(separator: string = ','): number[],
+    csvNumbers(separator: string = ',', toStrip: RegExp | null = null): number[],
 }
 
 declare interface Array {
     sum(): number,
-    prod(): number
+    prod(): number,
+    static seq(length: number): number[],
 }

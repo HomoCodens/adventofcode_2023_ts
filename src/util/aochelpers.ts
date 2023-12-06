@@ -2,8 +2,13 @@ String.prototype.lines = function(delimiter = '\n'): string[] {
     return this.trim().split(delimiter)
 }
 
-String.prototype.csvNumbers = function(separator: string = ','): number[] {
-    return this.trim().split(separator).map(Number).filter((x) => !Number.isNaN(x))
+String.prototype.csvNumbers = function(separator: string = ',', toStrip: RegExp | null = null): number[] {
+    let str: String = this;
+    if(toStrip !== null) {
+        str = str.replace(toStrip, '');
+    }
+
+    return str.trim().split(separator).filter(Boolean).map(Number)
 }
 
 Array.prototype.sum = function() {
@@ -19,4 +24,8 @@ Array.prototype.prod = function() {
     }
 
     return this.reduce((acc, x) => acc * x)
+}
+
+Array.prototype.seq = function(length: number) {
+    return new Array(length).fill(0).map((_, i) => i)
 }
