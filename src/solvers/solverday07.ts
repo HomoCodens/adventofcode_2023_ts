@@ -72,7 +72,7 @@ class Hand {
         return Object.entries(freqs)
                         .sort((a, b) => b[1] - a[1])
                         .flatMap(([cardValue, n], i, arr) => {
-                            if(i === 0) {
+                            if(i === 0 && wildJoker) {
                                 if(cardValue === 'J') {
                                     if(n < 5) {
                                         cardValue = arr[1][0]
