@@ -13,7 +13,11 @@ enum HandType {
 class Card {
     value: string
 
-    get strength(): number {
+    constructor(value: string) {
+        this.value = value
+    }
+
+    getStrength(wildJoker: boolean = false): number {
         const strengths: { [k: string]: number } = {
             '2': 0,
             '3': 1,
@@ -30,11 +34,11 @@ class Card {
             'A': 12,
         }
 
-        return strengths[this.value]
-    }
+        if(wildJoker) {
+            strengths['J'] = -1
+        }
 
-    constructor(value: string) {
-        this.value = value
+        return strengths[this.value]
     }
 }
 
@@ -55,17 +59,34 @@ class Hand {
         )
     }
 
-    cardsOrderedByFrequency(): Card[] {
+    cardsOrderedByFrequency(wildJoker: boolean = false): Card[] {
         type Map = { [key: string]: number }
         const freqs: Map = this.cards.reduce((freq: Map, card: Card): Map => {
             freq[card.value] = (freq[card.value] + 1) || 1
             return freq
         }, {} as Map)
-        return Object.entries(freqs).sort((a, b) => b[1] - a[1]).flatMap(([cardValue, n]) => (new Array(n)).fill(n).map(() => new Card(cardValue)));
+
+        const nJokers = freqs['J']
+        const hasJokers = nJokers !== undefined
+
+        return Object.entries(freqs)
+                        .sort((a, b) => b[1] - a[1])
+                        .flatMap(([cardValue, n], i, arr) => {
+                            if(i === 0) {
+                                if(cardValue === 'J') {
+                                    if(n < 5) {
+                                        cardValue = arr[1][0]
+                                    }
+                                } else if(hasJokers) {
+                                    n = n + nJokers
+                                }
+                            }
+                            return (new Array(n)).fill(n).map(() => new Card(cardValue))
+                        });
     }
 
-    handType(): HandType {
-        const orderedCards = this.cardsOrderedByFrequency().map((x) => x.value)
+    handType(wildJoker: boolean = false): HandType {
+        const orderedCards = this.cardsOrderedByFrequency(wildJoker).map((x) => x.value)
         
         // "State Machine" / "Decision Tree"
         if(orderedCards[0] === orderedCards[1]) {
@@ -95,12 +116,13 @@ class Hand {
         }
     }
 
-    compare(other: Hand): number {
-        const relativeTypeStrength = this.handType() - other.handType()
+    compare(other: Hand, wildJoker: boolean = false): number {
+        const relativeTypeStrength = this.handType(wildJoker) - other.handType(wildJoker)
+
         if(relativeTypeStrength === 0) {
             for(let c = 0; c < 5; c++) { // badum-tss
-                if(this.cards[c].strength !== other.cards[c].strength) {
-                    return this.cards[c].strength - other.cards[c].strength
+                if(this.cards[c].getStrength(wildJoker) !== other.cards[c].getStrength(wildJoker)) {
+                    return this.cards[c].getStrength(wildJoker) - other.cards[c].getStrength(wildJoker)
                 }
             }
         }
@@ -117,15 +139,16 @@ export default class SolverDay07 extends SolverBase<Hand[]> {
     }
 
     solvePartOne(input: Hand[]): Solvution {
-        const sortedHands = input.sort((a, b) => a.compare(b))
+        const sortedHands = input.sort((a, b) => a.compare(b, false))
         return new Solvution(
             sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0)
         )
     }
     
     solvePartTwo(input: Hand[]): Solvution {
+        const sortedHands = input.sort((a, b) => a.compare(b, true))
         return new Solvution(
-            'Answer goes here'
+            sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0)
         )
     }
 
