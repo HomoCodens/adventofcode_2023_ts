@@ -1,7 +1,6 @@
 import { assign, createMachine, fromPromise, log, sendTo } from 'xstate'
-import { chooseDay, mainMenu } from './menus'
-import Solvers from '../solvers'
-import { InputReader } from './inputReader'
+import { chooseDay, mainMenu, createDayMenu } from './menus'
+import { exec } from 'child_process'
 
 export const aocMachine = createMachine({
     id: 'elfMasheen',
@@ -34,7 +33,8 @@ export const aocMachine = createMachine({
                     id: 'chooseDay',
                     on: {
                         MAINMENU: 'mainMenu',
-                        RUNDAY: '#runSingleDay',
+                        CREATEDAY: 'createDay',
+                        DAYMENU: 'dayMenu',
                     },
                     invoke: {
                         src: chooseDay,
@@ -55,32 +55,60 @@ export const aocMachine = createMachine({
                         },
                     },
                 },
+                createDay: {
+                    id: 'createDay',
+                    on: {
+                        DAYCREATED: 'dayMenu'
+                    },
+                    invoke: {
+                        src: createDayMenu,
+                        onDone: {
+                            actions: [
+                                sendTo(({ self }) => self, ({ event }) => {
+                                    return {
+                                        type: 'DAYCREATED',
+                                        params: {
+                                            day: event.output.dayToCreate
+                                        }
+                                    }
+                                })
+                            ]
+                        }
+                    }
+                },
+                dayMenu: {
+                    id: 'dayMenu',
+                    entry: [
+                        assign({
+                            activeDay: ({ event }) => event.params.day - 1,
+                        }),
+                        log('now here'),
+                    ],
+                },
             },
         },
         running: {
             initial: '#runSingleDay',
-            entry: [
-                assign({
-                    activeDay: ({ event }) => event.params.dayToRun - 1,
-                }),
-            ],
+            
             states: {
                 runSingleDay: {
                     id: 'runSingleDay',
                     invoke: {
                         src: fromPromise(({ input }) => {
-                            const solver = new Solvers[input.day - 1]
-                            const inputReader = new InputReader(input.inputFileRoot)
-                            return Promise.all([
-                                solver.getSolutionOne(inputReader.readExample(input.day, 1)[0]),
-                                solver.getSolutionTwo(inputReader.readExample(input.day, 1)[0]),
-                                solver.getSolutionOne(inputReader.readInput(input.day)),
-                                solver.getSolutionTwo(inputReader.readInput(input.day)),
-                            ]).then(console.log)
+                            return new Promise((resolve, reject) => {
+                                exec(`tsx ./src/scripts/dayrunner.ts ${input.day}`, (error, stdout) => {
+                                    if(error) {
+                                        reject(error)
+                                    }
+
+                                    console.log(stdout)
+                                    resolve('')
+                                })
+                            })
                         }),
                         input: ({ event, context }) => {
                             return {
-                                day: (event as any).params.dayToRun,
+                                day: (event as any).params.day,
                                 inputFileRoot: context.inputRoot
                             }
                         },

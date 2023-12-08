@@ -1,4 +1,4 @@
-import SolverBase, { Solvution } from "./solverbase.js";
+import SolverBase, { Solvution } from './solverbase.js'
 
 export default class SolverDay01 extends SolverBase<string[]> {
     static override day = 1

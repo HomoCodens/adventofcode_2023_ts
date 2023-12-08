@@ -2,6 +2,7 @@ import inquirer from 'inquirer'
 import { fromPromise } from 'xstate'
 import Solvers from '../solvers'
 import { spawn } from 'child_process'
+import Scaffolder from './scaffolder'
 
 export const mainMenu = fromPromise(() => {
     return inquirer.prompt([
@@ -28,6 +29,10 @@ export const mainMenu = fromPromise(() => {
 export const chooseDay = fromPromise(({ input: { activeDay } }) => {
     const choices = [
         ...Solvers.map(({ day }) => ({ name: `Day ${day}`, value: day})),
+        {
+            name: 'Create new day...',
+            value: 'CREATEDAY',
+        },
         new inquirer.Separator(),
         {
             name: 'Back',
@@ -51,11 +56,30 @@ export const chooseDay = fromPromise(({ input: { activeDay } }) => {
             }
         }
 
+        if(choice.choice === 'CREATEDAY') {
+            return {
+                transition: 'CREATEDAY'
+            }
+        }
+
         return {
-            transition: 'RUNDAY',
+            transition: 'DAYMENU',
             params: {
-                dayToRun: choice.choice
+                day: choice.choice
             }
         }
     })
+})
+
+export const createDayMenu = fromPromise(({ input }) => {
+
+    return inquirer.prompt([
+        {
+            type: 'number',
+            name: 'dayToCreate',
+            message: 'Number of day to create',
+            prefix: '🎨',
+            default: (new Scaffolder('./')).nextUncreatedDay(),
+        }
+    ])
 })

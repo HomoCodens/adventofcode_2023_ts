@@ -1,3 +1,5 @@
+import '../util/aochelpers'
+
 export type SolvutionValue = string | number
 
 export class Solvution {
@@ -31,6 +33,13 @@ export default abstract class SolverBase<T> {
 
     async getSolutionTwo(rawInput: string): Promise<Solvution> {
         return this.solvePartTwo(this.prepareInput(rawInput))
+    }
+
+    async getBothSolutions(rawInput: string): Promise<Solvution[]> {
+        return Promise.all([
+            this.getSolutionOne(rawInput),
+            this.getSolutionTwo(rawInput),
+        ])
     }
 
     abstract solvePartOne(input: T): Solvution

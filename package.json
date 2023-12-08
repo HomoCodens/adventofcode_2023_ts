@@ -9,6 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "commander": "^11.1.0",
     "inquirer": "^9.2.12",
     "inquirer-press-to-continue": "^1.2.0",
     "mathjs": "^12.1.0",

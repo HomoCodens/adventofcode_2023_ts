@@ -5,8 +5,22 @@ import { padNumber } from './helpers'
 export default class Scaffolder {
     root: string
 
-    constructor(root: string) {
+    constructor(root: string = './') {
         this.root = root
+    }
+
+    nextUncreatedDay(): number {
+        const existingDays = fs.readdirSync(path.join(this.root, 'src', 'solvers'))
+            .filter((file) => file.match(/solverday\d+/))
+            .map((file) => +file.replace(/solverday(\d+).ts/, '$1'))
+
+        for(let i = 0; i < 26; i++) {
+            if(existingDays.indexOf(i + 1) < 0) {
+                return i + 1
+            }
+        }
+
+        return -1
     }
 
     scaffoldDay(day: number) {
@@ -25,7 +39,7 @@ export default class Scaffolder {
         }
 
         fs.writeFileSync(solver, `import SolverBase, { Solvution } from './solverbase'
-        
+
 export default class SolverDay${dayPadded} extends SolverBase<TInput> {
     static override day = ${day}
 
@@ -46,7 +60,8 @@ export default class SolverDay${dayPadded} extends SolverBase<TInput> {
     }
 
 }
-        `)
+`
+        )
 
         const index = path.join(
             this.root,
