@@ -1,23 +1,22 @@
-import * as maff from 'mathjs'
-
 import SolverBase, { Solvution } from './solverbase'
         
-export default class SolverDay09 extends SolverBase<number[][]> {
+export default class SolverDay09 extends SolverBase<number[][][]> {
     static override day = 9
 
-    prepareInput(rawInput: string): number[][] {
+    prepareInput(rawInput: string): number[][][] {
         return rawInput.lines().map((line) => line.csvNumbers(' '))
+                                .map((sequence) => this.differentiate(sequence).reverse())
     }
 
-    solvePartOne(input: number[][]): Solvution {
+    solvePartOne(input: number[][][]): Solvution {
         return new Solvution(
-            input.map((sequence) => this.getNextValueOf(sequence)).sum()
+            input.map((diffs) => this.getNextValueOf(diffs)).sum()
         )
     }
     
-    solvePartTwo(input: number[][]): Solvution {
+    solvePartTwo(input: number[][][]): Solvution {
         return new Solvution(
-            input.map((sequence) => this.getPreviousValueOf(sequence)).sum()
+            input.map((diffs) => this.getPreviousValueOf(diffs)).sum()
         )
     }
 
@@ -39,17 +38,13 @@ export default class SolverDay09 extends SolverBase<number[][]> {
         }
     }
 
-    getNextValueOf(sequence: number[]): number {
-        let diffs = this.differentiate(sequence)
-
+    getNextValueOf(diffs: number[][]): number {
         let integrated = diffs.reverse().reduce((next, x) => next + x[x.length - 1], 0)
 
         return integrated
     }
 
-    getPreviousValueOf(sequence: number[]): number {
-        let diffs = this.differentiate(sequence)
-
+    getPreviousValueOf(diffs: number[][]): number {
         let integrated = diffs.reverse().reduce((next, x) => x[0] - next, 0)
 
         return integrated
