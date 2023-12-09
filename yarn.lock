@@ -923,8 +923,3 @@ wrap-ansi@^6.2.0:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
-
-xstate@^5.0.0-beta.54:
-  version "5.0.0-beta.54"
-  resolved "https://registry.npmjs.org/xstate/-/xstate-5.0.0-beta.54.tgz"
-  integrity sha512-BTnCPBQ2iTKe4uCnHEe1hNx6VTbXU+5mQGybSQHOjTLiBi4Ryi+tL9T6N1tmqagvM8rfl4XRfvndogfWCWcdpw==

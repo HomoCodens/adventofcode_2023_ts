@@ -9,6 +9,15 @@ export class InputReader {
         this.root = root
     }
 
+    listExamples(day: number): string[] {
+        return fs.readdirSync(this.dayFolder(day))
+                    .filter((f) => f.match(/example\d+.txt/))
+    }
+
+    hasInput(day: number): boolean {
+        return fs.existsSync(path.join(this.dayFolder(day), 'input.txt'))
+    }
+
     readInput(day: number): string {
         return this.read(path.join(
             this.root,
@@ -22,19 +31,24 @@ export class InputReader {
         return [
             this.read(
                 path.join(
-                    this.root,
-                    `day${padNumber(day)}`,
+                    this.dayFolder(day),
                     `example${padNumber(example)}.txt`
                 )
             ),
             this.read(
                 path.join(
-                    this.root,
-                    `day${padNumber(day)}`,
+                    this.dayFolder(day),
                     `example${padNumber(example)}.solution.txt`
                 )
             )
         ]
+    }
+
+    private dayFolder(day: number): string {
+        return path.join(
+            this.root,
+            `day${padNumber(day)}`
+        )
     }
 
     private read(path: string): string {

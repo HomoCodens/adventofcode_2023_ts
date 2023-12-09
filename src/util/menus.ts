@@ -2,6 +2,7 @@ import inquirer from 'inquirer'
 import Solvers from '../solvers'
 import Scaffolder from './scaffolder'
 import { Transition } from './transitions'
+import { InputReader } from './inputReader'
 
 export const mainMenu = () =>
     inquirer.prompt({
@@ -48,6 +49,7 @@ export const chooseDay = (activeDay: number = 0): Promise<{ transition: Transiti
     
     return inquirer.prompt({
         type: 'list',
+        loop: false,
         message: 'Run a day',
         name: 'choice',
         prefix: '📅',
@@ -64,3 +66,33 @@ export const createDayMenu = () =>
             prefix: '🎨',
             default: (new Scaffolder('./')).nextUncreatedDay(),
     })
+
+export const dayMenu = (activeDay: number) => {
+    const reader = new InputReader()
+
+    return inquirer.prompt({
+        type: 'list',
+        name: 'input',
+        message: `Run Day ${activeDay}`,
+        prefix: '🏃‍♀️',
+        choices: [
+            ...(reader.hasInput(activeDay) ? [{
+                name: 'input.txt',
+                value: {
+                    day: activeDay,
+                    input: true,
+                }
+            }] : []),
+            ...reader.listExamples(activeDay).map((name, i) => {
+                return {
+                    name,
+                    value: {
+                        day: activeDay,
+                        input: false,
+                        example: i + 1,
+                    }
+                }
+            }),
+        ]
+    })
+}

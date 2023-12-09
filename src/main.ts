@@ -1,4 +1,6 @@
-import { chooseDay, createDayMenu, mainMenu } from './util/menus'
+import { Worker } from 'worker_threads'
+
+import { chooseDay, createDayMenu, dayMenu, mainMenu } from './util/menus'
 import Scaffolder from './util/scaffolder';
 import { Transition } from './util/transitions';
 
@@ -38,8 +40,24 @@ async function doCreateDay() {
     setImmediate(() => doDay(dayToCreate))
 }
 
-function doDay(day: number) {
-    console.log(`doing day ${day}`)
+async function doDay(day: number) {
+    const { input, example } = await dayMenu(day)
+
+    console.log(`doing the thing with ${input}`)
+
+    const w = new Worker('./src/workers/dayWorker.ts', {
+        workerData: {
+            day,
+            input,
+            example,
+        }
+    })
+    w.on('message', (solutions) => {
+        console.log(solutions)
+
+        setImmediate(() => doDay(day))
+    })
+
 }
 
 doMainMenu()
