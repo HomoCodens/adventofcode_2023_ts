@@ -5,7 +5,7 @@ import { padNumber } from './helpers'
 export class InputReader {
     private root: string
 
-    constructor(root: string) {
+    constructor(root: string = './input') {
         this.root = root
     }
 
