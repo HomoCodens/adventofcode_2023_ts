@@ -9,10 +9,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "commander": "^11.1.0",
+    "@mapbox/point-geometry": "^0.1.0",
+    "@types/mapbox__point-geometry": "^0.1.4",
     "inquirer": "^9.2.12",
     "inquirer-press-to-continue": "^1.2.0",
-    "mathjs": "^12.1.0"
+    "mathjs": "^12.2.0"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.7",
