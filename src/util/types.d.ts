@@ -8,3 +8,8 @@ declare interface Array {
     prod(): number,
     static seq(length: number): number[],
 }
+
+declare interface Location2D {
+    x: number,
+    y: number,
+}

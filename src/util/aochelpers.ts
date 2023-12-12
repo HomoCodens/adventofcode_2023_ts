@@ -29,3 +29,5 @@ Array.prototype.prod = function() {
 Array.prototype.seq = function(length: number) {
     return new Array(length).fill(0).map((_, i) => i)
 }
+
+export const manhattanDistance = (a: Location2D, b: Location2D) => Math.abs(a.x - b.x)  + Math.abs(a.y - b.y)
