@@ -2,13 +2,43 @@ String.prototype.lines = function(delimiter = '\n'): string[] {
     return this.trim().split(delimiter)
 }
 
-String.prototype.csvNumbers = function(separator: string = ',', toStrip: RegExp | null = null): number[] {
+String.prototype.csvNumbers = function(separator: string = ',',
+                                        toStrip: RegExp | null = null,
+                                        stripNulls: boolean = true): number[] {
+    return this.csv(separator, Number, toStrip, stripNulls)
+}
+
+String.prototype.csv = function<T>(separator: string = ',',
+                                    parser: (chunk: any) => T,
+                                    toStrip: RegExp | null = null,
+                                    stripNulls: boolean = true): T[] {
     let str: String = this;
     if(toStrip !== null) {
         str = str.replace(toStrip, '');
     }
 
-    return str.trim().split(separator).filter(Boolean).map(Number)
+    let elements: T[] = str.trim().split(separator).map(parser)
+    
+    if(stripNulls) {
+        elements = elements.filter((x) => x !== null && x !== undefined)
+    }
+
+    return elements
+}
+
+// TODO: can one do parsers: { [k in groupsof expr]: any } or somewhat?
+String.prototype.parseByRegex = function(expr: RegExp, parsers: any): any {
+    const matches = expr.exec(this as string)
+
+    if(!matches) {
+        return {}
+    } else {
+        return Object.entries(matches.groups!).reduce((acc: any, [groupName, chunk]) => {
+            acc[groupName] = parsers[groupName](chunk)
+            return acc
+        }, {})
+    }
+
 }
 
 Array.prototype.sum = function() {

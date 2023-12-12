@@ -1,6 +1,8 @@
 declare interface String {
     lines(delimiter: string = '\n'): string[],
-    csvNumbers(separator: string = ',', toStrip: RegExp | null = null): number[],
+    csv<T>(separator: string = ',', parser: (chunk: any) => T, toStrip: RegExp | null = null, stripNulls: boolean = true): T[],
+    csvNumbers(separator: string = ',', toStrip: RegExp | null = null, stripNulls: boolean = true): number[],
+    parseByRegex(expr: RegExp, parsers: any): any,
 }
 
 declare interface Array {
