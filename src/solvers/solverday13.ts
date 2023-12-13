@@ -1,30 +1,56 @@
 import SolverBase, { Solvution } from './solverbase'
-
-enum Ground {
-    ROCK = '#',
-    ASH = '.',
-}
+import '../util/aochelpers'
+import { boolean, number } from 'mathjs'
+import { up } from 'inquirer/lib/utils/readline'
 
 class RockPattern {
-    tiles: Ground[][]
+    rows: number[]
+    cols: number[]
 
-    constructor(tiles: Ground[][]) {
-        this.tiles = tiles
+    get height() {
+        return this.rows.length
     }
 
-    static fromString(def: string) {
-        return new RockPattern(
-            def.lines().map((line) => line.csv('', (char) => char === '.' ? Ground.ASH : Ground.ROCK))
-        )
+    get width() {
+        return this.cols.length
     }
 
-    toString() {
-        return this.tiles.map((line) => line.map((tile) => tile === Ground.ASH ? '.' : '#').join('')).join('\n') + '\n'
+    constructor(rows: number[], cols: number[]) {
+        this.rows = rows
+        this.cols = cols
     }
 
-    findHorizontalMirrorage(): number {
-        for(let eenieBetweenie = 0; eenieBetweenie < this.tiles.length; eenieBetweenie++) {
-            if(this.isHorizontallyMirroredAt(eenieBetweenie)) {
+    static fromString(def: string): RockPattern {
+        const bitMap = def.lines().map((line) => line.csv('', (char) => char === '.' ? 0 : 1))
+        const rows = bitMap.map((row) => RockPattern.bashBitsIntoNumber([...row].reverse()))
+                                            
+        const cols = (new Array(bitMap[0].length)).fill(0).map((_, i) => i)
+                        .map((colIndex) => bitMap.map((row) => row[colIndex]))
+                        .map((col) => RockPattern.bashBitsIntoNumber([...col].reverse()))
+        return new RockPattern(rows, cols)
+    }
+
+    private static bashBitsIntoNumber(bits: number[]): number {
+        return bits.reduce((row: number, bit: number, exponent: number): number => row + bit*(2**exponent), 0)
+    }
+
+    findMirrorageIndex(): number {
+        return this.findHorizontalMirrorage() + this.findVerticalMirrorage()
+    }
+
+    findTheOtherOne(): number {
+        const horizontal = this.findHorizontalMirrorage(true)
+        const vanillaHorizontal = this.findHorizontalMirrorage()
+        if(horizontal !== vanillaHorizontal) {
+            return horizontal
+        }
+
+        return this.findVerticalMirrorage(true)
+    }
+
+    private findHorizontalMirrorage(smudge: boolean = false): number {
+        for(let eenieBetweenie = 0; eenieBetweenie < this.height; eenieBetweenie++) {
+            if(this.isHorizontallyMirroredAt(eenieBetweenie, smudge)) {
                 return 100*(eenieBetweenie + 1)
             }
         }
@@ -32,28 +58,13 @@ class RockPattern {
         return 0
     }
 
-    isHorizontallyMirroredAt(split: number): boolean {
-        if(split === this.tiles.length - 1) {
-            return false
-        }
-
-        let upwardFront = split
-        let downwardFront = split + 1
-
-        while(upwardFront >= 0 && downwardFront < this.tiles.length) {
-            if(!this.compareStrips(this.tiles[upwardFront], this.tiles[downwardFront])) {
-                return false
-            }
-            upwardFront--
-            downwardFront++
-        }
-
-        return true
+    private isHorizontallyMirroredAt(split: number, smudge: boolean = false): boolean {
+        return this.isMirroredAt(split, this.rows, smudge)
     }
 
-    findVerticalMirrorage(): number {
-        for(let eenieBetweenie = 0; eenieBetweenie < this.tiles[0].length; eenieBetweenie++) {
-            if(this.isVerticallyMirroredAt(eenieBetweenie)) {
+    private findVerticalMirrorage(smudge: boolean = false): number {
+        for(let eenieBetweenie = 0; eenieBetweenie < this.width; eenieBetweenie++) {
+            if(this.isVerticallyMirroredAt(eenieBetweenie, smudge)) {
                 return eenieBetweenie + 1
             }
         }
@@ -61,27 +72,49 @@ class RockPattern {
         return 0
     }
 
-    isVerticallyMirroredAt(split: number): boolean {
-        if(split === this.tiles[0].length - 1) {
+    private isVerticallyMirroredAt(split: number, smudge: boolean = false): boolean {
+        return this.isMirroredAt(split, this.cols, smudge)
+    }
+
+    private isMirroredAt(split: number,
+        strips: number[],
+        smudge: boolean = false,
+        upwardFront: number = split,
+        downwardFront: number = split + 1): boolean {
+        if(split === strips.length - 1) {
             return false
         }
 
-        let leftwardFront = split
-        let rightwardFront = split + 1
-
-        while(leftwardFront >= 0 && rightwardFront < this.tiles[0].length) {
-            if(!this.compareStrips(this.tiles.map((row) => row[leftwardFront]), this.tiles.map((row) => row[rightwardFront]))) {
+        while(upwardFront >= 0 && downwardFront < strips.length) {
+            if((!smudge) && (strips[upwardFront] != strips[downwardFront])) {
                 return false
             }
-            leftwardFront--
-            rightwardFront++
+
+            if(smudge) {
+                const differingBit = this.getDifferingBit(strips[upwardFront], strips[downwardFront])
+                if(differingBit > 0) {
+                    if(this.isMirroredAt(split, this.flipBitIn(strips, upwardFront, differingBit), false, upwardFront, downwardFront)) {
+                        return true
+                    }
+                }
+            }
+
+            upwardFront--
+            downwardFront++
         }
 
-        return true
+        return !smudge
     }
 
-    compareStrips(a: Ground[], b: Ground[]): boolean {
-        return a.length === b.length && a.every((aa, i) => aa === b[i])
+    private getDifferingBit(a: number, b: number) : number {
+        const aXORb = a ^ b
+        return aXORb && ((aXORb & (aXORb - 1)) === 0) ? aXORb : 0
+    }
+
+    private flipBitIn(strips: number[], toFlip: number, bit: number): number[] {
+        const out = [...strips]
+        out[toFlip] = out[toFlip] ^ bit
+        return out
     }
 }
 
@@ -94,13 +127,13 @@ export default class SolverDay13 extends SolverBase<RockPattern[]> {
 
     solvePartOne(input: RockPattern[]): Solvution {
         return new Solvution(
-            input.map((pattern) => pattern.findHorizontalMirrorage() + pattern.findVerticalMirrorage()).sum()
+            input.map((pattern) => pattern.findMirrorageIndex()).sum()
         )
     }
     
     solvePartTwo(input: RockPattern[]): Solvution {
         return new Solvution(
-            'Answer goes here'
+            input.map((pattern) => pattern.findTheOtherOne()).sum()
         )
     }
 
