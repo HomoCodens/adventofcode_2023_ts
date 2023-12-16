@@ -255,6 +255,7 @@ export default class SolverDay16 extends SolverBase<Tile[][]> {
     }
     
     solvePartTwo(input: Tile[][]): Solvution {
+        console.log(Array.seq(14))
         // let bestest = this.countEnergies(this.runWith(new Beam(new Point(3, 0), Direction.SOUTH), input))
         
         let bestest = 0

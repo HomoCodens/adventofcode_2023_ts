@@ -106,7 +106,7 @@ class LavaPlace {
     constructor(private boxes: Bahks[], private instructions: Instruction[]) {}
 
     static fromString(def: String): LavaPlace {
-        const boxes = new Array(256).fill(0).map((_, i) => new Bahks(i))
+        const boxes = Array.seq(256).map((i) => new Bahks(i))
         const instructions = def.csv(',', Instruction.fromString)
         return new LavaPlace(boxes, instructions)
     }

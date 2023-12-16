@@ -5,11 +5,13 @@ declare interface String {
     parseByRegex(expr: RegExp, parsers: any): any,
 }
 
+declare interface ArrayConstructor {
+    seq(length: number): number[],
+}
 declare interface Array {
     sum(): number,
     prod(): number,
     twoString(elementSep: string = '', lineSep: string = '\n'): string,
-    static seq(length: number): number[],
 }
 
 declare interface Location2D {

@@ -24,7 +24,7 @@ class RockPattern {
         const bitMap = def.lines().map((line) => line.csv('', (char) => char === '.' ? 0 : 1))
         const rows = bitMap.map((row) => RockPattern.bashBitsIntoNumber([...row].reverse()))
                                             
-        const cols = (new Array(bitMap[0].length)).fill(0).map((_, i) => i)
+        const cols = Array.seq(bitMap[0].length)
                         .map((colIndex) => bitMap.map((row) => row[colIndex]))
                         .map((col) => RockPattern.bashBitsIntoNumber([...col].reverse()))
         return new RockPattern(rows, cols)

@@ -12,7 +12,7 @@ class Race {
     getNumberOfWaysToWin(): number {
         // TODO: Better idea for later
         //       solve for global max and threshold(s?) and count analytically
-        return (new Array(this.length)).fill(0).map((_, i) => i)
+        return Array.seq(this.length)
                 .filter((tPush) => (this.length - tPush)*tPush > this.record).length
     }
 }

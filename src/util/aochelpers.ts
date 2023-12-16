@@ -60,7 +60,7 @@ Array.prototype.twoString = function(elementSep: string = '', lineSep: string = 
     return this.map((line) => line.join(elementSep)).join(lineSep)
 }
 
-Array.prototype.seq = function(length: number) {
+Array.seq = function(length: number) {
     return new Array(length).fill(0).map((_, i) => i)
 }
 
