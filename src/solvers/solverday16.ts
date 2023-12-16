@@ -165,19 +165,14 @@ class Beam {
         }
     }
 
-    constructor(public position: Point, public direction: Direction, public placesIBeen: BeamState[] = []) { }
+    constructor(public position: Point, public direction: Direction) { }
 
     step(verld: Tile[][]): Beam[] {
-        if(this.beenHereBefore() || this.offGrid(verld.length, verld[0].length)) {
+        if(this.offGrid(verld.length, verld[0].length)) {
             this.active = false
             return [this]
         }
-        
-        this.placesIBeen.push({
-            position: this.position.clone(),
-            facing: this.direction,
-        })
-        
+
         const newBeams = verld[this.y][this.x].actOnBeam(this)
         newBeams.forEach((nb) => nb.moof())
         return newBeams
@@ -185,10 +180,6 @@ class Beam {
     
     moof() {
         this.position = this.position.add(this.velocity)
-    }
-    
-    beenHereBefore(): boolean {
-        return this.placesIBeen.findIndex(({ position, facing }) => this.position.equals(position) && this.direction === facing) >= 0
     }
 
     offGrid(height: number, width: number): boolean {
@@ -244,8 +235,7 @@ class Beam {
     clone(): Beam {
         return new Beam(
             this.position.clone(),
-            this.direction,
-            this.placesIBeen.map((p) => ({position: p.position.clone(), facing: p.facing}))
+            this.direction
         )
     }
 }
