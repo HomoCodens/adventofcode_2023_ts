@@ -93,7 +93,12 @@ class RockPattern {
             if(smudge) {
                 const differingBit = this.getDifferingBit(strips[upwardFront], strips[downwardFront])
                 if(differingBit > 0) {
-                    if(this.isMirroredAt(split, this.flipBitIn(strips, upwardFront, differingBit), false, upwardFront, downwardFront)) {
+                    if(this.isMirroredAt(
+                        split,
+                        this.flipBitIn(strips, upwardFront, differingBit),
+                        false,
+                        upwardFront,
+                        downwardFront)) {
                         return true
                     }
                 }

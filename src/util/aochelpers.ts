@@ -9,7 +9,7 @@ String.prototype.csvNumbers = function(separator: string = ',',
 }
 
 String.prototype.csv = function<T>(separator: string = ',',
-                                    parser: (chunk: any) => T,
+                                    parser: (chunk: any, index: number) => T,
                                     toStrip: RegExp | null = null,
                                     stripNulls: boolean = true): T[] {
     let str: String = this;
@@ -54,6 +54,10 @@ Array.prototype.prod = function() {
     }
 
     return this.reduce((acc, x) => acc * x)
+}
+
+Array.prototype.twoString = function(elementSep: string = '', lineSep: string = '\n') {
+    return this.map((line) => line.join(elementSep)).join(lineSep)
 }
 
 Array.prototype.seq = function(length: number) {
