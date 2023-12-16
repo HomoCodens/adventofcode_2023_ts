@@ -42,6 +42,10 @@ String.prototype.parseByRegex = function(expr: RegExp, parsers: any): any {
 }
 
 Array.prototype.sum = function() {
+    if(this.length === 0) {
+        return 0
+    }
+
     if(typeof this[0] != 'number') {
         return Number.NaN
     }
