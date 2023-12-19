@@ -16,6 +16,7 @@ import SolverDay15 from './solverday15'
 import SolverDay16 from './solverday16'
 import SolverDay17 from './solverday17'
 import SolverDay18 from './solverday18'
+import SolverDay19 from './solverday19'
 
 const Solvers = [
     SolverDay01,
@@ -36,6 +37,7 @@ const Solvers = [
     SolverDay16,
     SolverDay17,
     SolverDay18,
+    SolverDay19,
 ]
 
 export default Solvers
