@@ -6,6 +6,19 @@ const REJECTED = 'R'
 
 type PartPropertyKey = 'x' | 'm' | 'a' | 's'
 
+type ParameterRange = {
+    min: number,
+    max: number,
+}
+
+// As in "It plumbs the depths of..." 🤷🏻
+type Bathysphere = {
+    x: ParameterRange,
+    m: ParameterRange,
+    a: ParameterRange,
+    s: ParameterRange,
+}
+
 class Part {
     constructor(public x: number, public m: number, public a: number, public s: number) {}
 
@@ -23,6 +36,8 @@ abstract class Check {
     constructor(public propertyKey: PartPropertyKey, public threshold: number, public targetWorkflow: string) {}
 
     abstract testPart(part: Part): boolean
+    abstract shnipPart(part: Bathysphere): Bathysphere
+    abstract antiShnipPart(part: Bathysphere): Bathysphere
 
     static fromString(def: string): Check {
         const [_, propertyKey, operator, threshold, targetWorkflow] = /([xmas])([<>])(\d+):(\w+)/.exec(def)!
@@ -40,11 +55,39 @@ class GtCheck extends Check {
     override testPart(part: Part) {
         return part[this.propertyKey] > this.threshold
     }
+
+    override shnipPart(part: Bathysphere): Bathysphere {
+        const out = JSON.parse(JSON.stringify(part))
+        
+        out[this.propertyKey].min = Math.max(out[this.propertyKey].min, this.threshold + 1)
+        return out
+    }
+
+    override antiShnipPart(part: Bathysphere): Bathysphere {
+        const out = JSON.parse(JSON.stringify(part))
+
+        out[this.propertyKey].max = Math.min(out[this.propertyKey].max, this.threshold)
+        return out
+    }
 }
 
 class LtCheck extends Check {
     override testPart(part: Part): boolean {
         return part[this.propertyKey] < this.threshold    
+    }
+
+    override shnipPart(part: Bathysphere): Bathysphere {
+        const out = JSON.parse(JSON.stringify(part))
+        
+        out[this.propertyKey].max = Math.min(out[this.propertyKey].max, this.threshold - 1)
+        return out
+    }
+
+    override antiShnipPart(part: Bathysphere): Bathysphere {
+        const out = JSON.parse(JSON.stringify(part))
+
+        out[this.propertyKey].min = Math.max(out[this.propertyKey].min, this.threshold)
+        return out
     }
 }
 
@@ -105,9 +148,47 @@ class PartFilter {
         })
     }
 
-    goDeepa(): number {
-        const BillionsAndBillionsOfParts = 42_000_000_000
-        return BillionsAndBillionsOfParts
+    goDeepa(propertyMax: number = 4000): number {
+        return this.dive(
+            'in',
+            {
+                x: { min: 1, max: propertyMax },
+                m: { min: 1, max: propertyMax },
+                a: { min: 1, max: propertyMax },
+                s: { min: 1, max: propertyMax },
+            })
+    }
+
+    private dive(currentWorkflowId: string, testPart: Bathysphere): number {
+        if(testPart.x.min > testPart.x.max ||
+            testPart.m.min > testPart.m.max ||
+            testPart.a.min > testPart.a.max ||
+            testPart.s.min > testPart.s.max) {
+                return 0;
+            }
+        
+        if(currentWorkflowId === REJECTED) {
+            return 0;
+        }
+
+        if(currentWorkflowId === ACCEPTED) {
+            return (testPart.x.max - testPart.x.min + 1) *
+                        (testPart.m.max - testPart.m.min + 1) *
+                        (testPart.a.max - testPart.a.min + 1) *
+                        (testPart.s.max - testPart.s.min + 1)
+        }
+
+        let antiPart = JSON.parse(JSON.stringify(testPart))
+        const currentWorkflow = this.workflows.get(currentWorkflowId)!
+        let out = 0;
+        currentWorkflow.checks.forEach((check) => {
+            out += this.dive(check.targetWorkflow, check.shnipPart(antiPart))
+            antiPart = check.antiShnipPart(antiPart)
+        })
+
+        out += this.dive(currentWorkflow.defaultTarget, antiPart)
+
+        return out
     }
 }
 
