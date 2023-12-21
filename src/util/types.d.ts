@@ -11,6 +11,7 @@ declare interface ArrayConstructor {
 declare interface Array {
     sum(): number,
     prod(): number,
+    unique(): Array,
     twoString(elementSep: string = '', lineSep: string = '\n'): string,
 }
 

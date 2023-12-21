@@ -60,6 +60,10 @@ Array.prototype.prod = function() {
     return this.reduce((acc, x) => acc * x)
 }
 
+Array.prototype.unique = function() {
+    return [...new Set(this)]
+}
+
 Array.prototype.twoString = function(elementSep: string = '', lineSep: string = '\n') {
     return this.map((line) => line.join(elementSep)).join(lineSep)
 }
