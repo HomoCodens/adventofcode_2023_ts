@@ -1,7 +1,7 @@
 declare interface String {
     lines(delimiter: string = '\n'): string[],
-    csv<T>(separator: string = ',', parser: (chunk: any, index: number) => T, toStrip: RegExp | null = null, stripNulls: boolean = true): T[],
-    csvNumbers(separator: string = ',', toStrip: RegExp | null = null, stripNulls: boolean = true): number[],
+    csv<T>(separator: string | RegExp = ',', parser: (chunk: any, index: number) => T, toStrip: RegExp | null = null, stripNulls: boolean = true): T[],
+    csvNumbers(separator: string | RegExp = ',', toStrip: RegExp | null = null, stripNulls: boolean = true): number[],
     parseByRegex(expr: RegExp, parsers: any): any,
 }
 

@@ -2,13 +2,13 @@ String.prototype.lines = function(delimiter = '\n'): string[] {
     return this.trim().split(delimiter)
 }
 
-String.prototype.csvNumbers = function(separator: string = ',',
+String.prototype.csvNumbers = function(separator: string | RegExp = ',',
                                         toStrip: RegExp | null = null,
                                         stripNulls: boolean = true): number[] {
     return this.csv(separator, Number, toStrip, stripNulls)
 }
 
-String.prototype.csv = function<T>(separator: string = ',',
+String.prototype.csv = function<T>(separator: string | RegExp = ',',
                                     parser: (chunk: any, index: number) => T,
                                     toStrip: RegExp | null = null,
                                     stripNulls: boolean = true): T[] {
