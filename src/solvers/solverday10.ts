@@ -356,7 +356,8 @@ export default class SolverDay10 extends SolverBase<Maze> {
         const path = input.getPipesOnPath()
 
         return new Solvution(
-            Math.floor(Object.keys(path).length / 2)
+            Math.floor(Object.keys(path).length / 2),
+            'Yon critter will have to take $$ steps to get to the farthest bit.'
         )
     }
     
@@ -383,7 +384,8 @@ export default class SolverDay10 extends SolverBase<Maze> {
         })
 
         return new Solvution(
-            innieOuties.flat().reduce((acc, x) => acc + (x === 'I' ? 1 : 0), 0)
+            innieOuties.flat().reduce((acc, x) => acc + (x === 'I' ? 1 : 0), 0),
+            'Snap! It could also be hiding in $$ other locations...'
         )
     }
 

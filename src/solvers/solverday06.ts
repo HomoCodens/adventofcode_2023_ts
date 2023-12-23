@@ -29,6 +29,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
     solvePartOne(input: Race[]): Solvution {
         return new Solvution(
             input.map((race) => race.getNumberOfWaysToWin()).prod(),
+            'Under the assumption that there are multiple races, the solution is $$.'
         )
     }
     
@@ -39,6 +40,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
         )
         return new Solvution(
             actualRace.getNumberOfWaysToWin(),
+            'In the MegaGigaRace there are $$ ways to win. Taking the best of course.'
         )
     }
 

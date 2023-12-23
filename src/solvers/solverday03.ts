@@ -81,7 +81,8 @@ export default class SolverDay03 extends SolverBase<Schematic> {
     solvePartOne(input: Schematic): Solvution {
         return new Solvution(
             input.numberTokens.filter((number) => input.symbolTokens.some((symbol) => number.adjacentTo(symbol)))
-                .reduce((acc: number, { value }: NumberToken) => acc + value, 0)
+                .reduce((acc: number, { value }: NumberToken) => acc + value, 0),
+            'The part numbers in the shcematic sum to $$.'
         )
     }
     
@@ -90,7 +91,8 @@ export default class SolverDay03 extends SolverBase<Schematic> {
             input.symbolTokens.filter(({ value }) => value === '*')
                     .map((symbol) => input.numberTokens.filter((number) => symbol.adjacentTo(number)))
                     .filter((numbers) => numbers.length === 2)
-                    .reduce((acc, numbers) => acc + numbers[0].value*numbers[1].value, 0)
+                    .reduce((acc, numbers) => acc + numbers[0].value*numbers[1].value, 0),
+            'Summing all the gear ratios gets us a nice round $$.'
         )
     }
 }

@@ -4,19 +4,21 @@ export default class SolverDay09 extends SolverBase<number[][][]> {
     static override day = 9
 
     prepareInput(rawInput: string): number[][][] {
-        return rawInput.lines().map((line) => line.csvNumbers(' '))
+        return rawInput.lines().map((line) => line.csvNumbers(/ +/))
                                 .map((sequence) => this.differentiate(sequence).reverse())
     }
 
     solvePartOne(input: number[][][]): Solvution {
         return new Solvution(
-            input.map((diffs) => this.getNextValueOf(diffs)).sum()
+            input.map((diffs) => this.getNextValueOf(diffs)).sum(),
+            'Continuing the sequences forward, we get $$.'
         )
     }
     
     solvePartTwo(input: number[][][]): Solvution {
         return new Solvution(
-            input.map((diffs) => this.getPreviousValueOf(diffs)).sum()
+            input.map((diffs) => this.getPreviousValueOf(diffs)).sum(),
+            'Looking back beyond the edge of the sequenceverses, we arrive at a sensible $$.'
         )
     }
 
@@ -39,13 +41,13 @@ export default class SolverDay09 extends SolverBase<number[][][]> {
     }
 
     getNextValueOf(diffs: number[][]): number {
-        let integrated = diffs.reverse().reduce((next, x) => next + x[x.length - 1], 0)
+        let integrated = diffs.reduce((next, x) => next + x[x.length - 1], 0)
 
         return integrated
     }
 
     getPreviousValueOf(diffs: number[][]): number {
-        let integrated = diffs.reverse().reduce((next, x) => x[0] - next, 0)
+        let integrated = diffs.reduce((next, x) => x[0] - next, 0)
 
         return integrated
     }

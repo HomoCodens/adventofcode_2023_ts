@@ -201,13 +201,15 @@ export default class SolverDay19 extends SolverBase<PartFilter> {
 
     solvePartOne(input: PartFilter): Solvution {
         return new Solvution(
-            input.getPassingParts().map((p) => p.weight).sum()
+            input.getPassingParts().map((p) => p.weight).sum(),
+            'There\'s a total of $$ parts passing the test.',
         )
     }
     
     solvePartTwo(input: PartFilter): Solvution {
         return new Solvution(
-            input.goDeepa()
+            input.goDeepa(),
+            'Employing Quantum Gear Computation Technologs, we determine there are a total of $$ possible passing parts (probably).'
         )
     }
 

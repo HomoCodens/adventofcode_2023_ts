@@ -53,11 +53,6 @@ class Verse {
         const starlessityX = this.starlessVoidsX.filter((col) => col > Math.min(galaxyI.x, galaxyJ.x) && col < Math.max(galaxyI.x, galaxyJ.x))
         const starlessityY = this.starlessVoidsY.filter((row) => row > Math.min(galaxyI.y, galaxyJ.y) && row < Math.max(galaxyI.y, galaxyJ.y))
 
-        if(i === 4 && j === 8) {
-            console.log(starlessityX)
-            console.log(starlessityY)
-        }
-
         return starlessityX.length + starlessityY.length
     }
 
@@ -83,13 +78,15 @@ export default class SolverDay11 extends SolverBase<Verse> {
 
     solvePartOne(input: Verse): Solvution {
         return new Solvution(
-            input.cumulativeDistances(1)
+            input.cumulativeDistances(1),
+            `An (inefficient) intergalactic salesman would be travelling for $$ steps.`,
         )
     }
     
     solvePartTwo(input: Verse): Solvution {
         return new Solvution(
-            input.cumulativeDistances(1e6)
+            input.cumulativeDistances(1e6),
+            'Universe is older than expected. Fahgeddabautit... $$',
         )
     }
 

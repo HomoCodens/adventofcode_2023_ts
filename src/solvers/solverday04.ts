@@ -24,7 +24,7 @@ class ScritchCard {
     static fromString(def: string): ScritchCard {
         const parts = def.replace(/Card \d+: /, '')
                             .split(' | ')
-                            .map((half) => half.csvNumbers(' '))
+                            .map((half) => half.csvNumbers(/ +/))
 
         return new ScritchCard(
             new Set(parts[0]),
@@ -42,7 +42,8 @@ export default class SolverDay04 extends SolverBase<ScritchCard[]> {
 
     solvePartOne(input: ScritchCard[]): Solvution {
         return new Solvution(
-            input.reduce((acc: number, card: ScritchCard) => acc + card.score, 0)
+            input.reduce((acc: number, card: ScritchCard) => acc + card.score, 0),
+            `All those ${input.length} scratch cards are worth $$ points.`
         )
     }
 
@@ -56,7 +57,8 @@ export default class SolverDay04 extends SolverBase<ScritchCard[]> {
         }
 
         return new Solvution(
-            tickets.sum()
+            tickets.sum(),
+            'Tickets... Tickets everywhere! We end up with $$ many.'
         )
     }
 

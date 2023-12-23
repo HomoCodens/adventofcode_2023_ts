@@ -141,16 +141,17 @@ export default class SolverDay07 extends SolverBase<Hand[]> {
     solvePartOne(input: Hand[]): Solvution {
         const sortedHands = input.sort((a, b) => a.compare(b, false))
         return new Solvution(
-            sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0)
+            sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0),
+            '$$ winnings, I\'m rich bebbeh!'
         )
     }
     
     solvePartTwo(input: Hand[]): Solvution {
         const sortedHands = input.sort((a, b) => a.compare(b, true))
         return new Solvution(
-            sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0)
+            sortedHands.reduce((winnings, hand, i) => winnings + (i+1)*hand.bet, 0),
+            'Jokers, even better! Now we make $$. Wait...'
         )
     }
 
 }
-        

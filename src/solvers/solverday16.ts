@@ -250,12 +250,12 @@ export default class SolverDay16 extends SolverBase<Tile[][]> {
     solvePartOne(input: Tile[][]): Solvution {
         const resoelt = this.runWith(new Beam(new Point(0, 0), Direction.EAST), input)
         return new Solvution(
-            this.countEnergies(resoelt)
+            this.countEnergies(resoelt),
+            'Run, Beamo, run! You will touch $$ tiles.'
         )
     }
     
     solvePartTwo(input: Tile[][]): Solvution {
-        console.log(Array.seq(14))
         // let bestest = this.countEnergies(this.runWith(new Beam(new Point(3, 0), Direction.SOUTH), input))
         
         let bestest = 0
@@ -267,14 +267,14 @@ export default class SolverDay16 extends SolverBase<Tile[][]> {
 
             if(downScore > bestest) {
                 bestest = downScore
-                console.log(`got a new bestest, moving ${downBeam.direction} from (${i} - 0): ${bestest}`)
+                // console.log(`got a new bestest, moving ${downBeam.direction} from (${i} - 0): ${bestest}`)
             }
 
             const upBeam = new Beam(new Point(i, height), Direction.NORTH)
             const upScore = this.countEnergies(this.runWith(upBeam, input))
             if(upScore > bestest) {
                 bestest = downScore
-                console.log(`got a new bestest, moving ${upBeam.direction} from (${i} - ${height}): ${bestest}`)
+                // console.log(`got a new bestest, moving ${upBeam.direction} from (${i} - ${height}): ${bestest}`)
             }
         }
 
@@ -284,19 +284,20 @@ export default class SolverDay16 extends SolverBase<Tile[][]> {
 
             if(rightScore > bestest) {
                 bestest = rightScore
-                console.log(`got a new bestest, moving ${rightBeam.direction} from (0 - ${i}): ${bestest}`)
+                // console.log(`got a new bestest, moving ${rightBeam.direction} from (0 - ${i}): ${bestest}`)
             }
 
             const leftBeam = new Beam(new Point(i, height), Direction.WEST)
             const leftScore = this.countEnergies(this.runWith(leftBeam, input))
             if(leftScore > bestest) {
                 bestest = leftScore
-                console.log(`got a new bestest, moving ${leftBeam.direction} from (${width} - ${i}): ${bestest}`)
+                // console.log(`got a new bestest, moving ${leftBeam.direction} from (${width} - ${i}): ${bestest}`)
             }
         }
 
         return new Solvution(
-            bestest
+            bestest,
+            'Welp, you should have entered somewhere else. Best we could have done is $$.'
         )
     }
 

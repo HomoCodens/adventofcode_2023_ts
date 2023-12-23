@@ -4,14 +4,14 @@ String.prototype.lines = function(delimiter = '\n'): string[] {
 
 String.prototype.csvNumbers = function(separator: string | RegExp = ',',
                                         toStrip: RegExp | null = null,
-                                        stripNulls: boolean = true): number[] {
-    return this.csv(separator, Number, toStrip, stripNulls)
+                                        stripNonNumbers: boolean = true): number[] {
+    return this.csv(separator, Number, toStrip, stripNonNumbers)
 }
 
 String.prototype.csv = function<T>(separator: string | RegExp = ',',
                                     parser: (chunk: any, index: number) => T,
                                     toStrip: RegExp | null = null,
-                                    stripNulls: boolean = true): T[] {
+                                    stripNonNumbers: boolean = true): T[] {
     let str: String = this;
     if(toStrip !== null) {
         str = str.replace(toStrip, '');
@@ -19,8 +19,8 @@ String.prototype.csv = function<T>(separator: string | RegExp = ',',
 
     let elements: T[] = str.trim().split(separator).map(parser)
     
-    if(stripNulls) {
-        elements = elements.filter((x) => x !== null && x !== undefined)
+    if(stripNonNumbers) {
+        elements = elements.filter((x) => x !== null && x !== undefined && !Number.isNaN(x))
     }
 
     return elements

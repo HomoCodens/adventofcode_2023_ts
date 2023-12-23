@@ -140,14 +140,16 @@ export default class SolverDay15 extends SolverBase<LavaPlace> {
 
     solvePartOne(input: LavaPlace): Solvution {
         return new Solvution(
-            input.calibrationHash()
+            input.calibrationHash(),
+            'Calibrating... The hash is $$.',
         )
     }
     
     solvePartTwo(input: LavaPlace): Solvution {
         input.run()
         return new Solvution(
-            input.finalHash()
+            input.finalHash(),
+            'The final focusing power of this contraption works out to about exactly $$.'
         )
     }
 }

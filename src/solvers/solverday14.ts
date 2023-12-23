@@ -161,7 +161,8 @@ export default class SolverDay14 extends SolverBase<Plattform> {
     solvePartOne(input: Plattform): Solvution {
         input.northify()
         return new Solvution(
-            input.calculateLoad()
+            input.calculateLoad(),
+            'What a brilliant idea! Putting all the load on the damaged north side results in it bearing $$ load units.'
         )
     }
     
@@ -183,7 +184,8 @@ export default class SolverDay14 extends SolverBase<Plattform> {
         input.settle()
 
         return new Solvution(
-            input.calculateLoad()
+            input.calculateLoad(),
+            '_One eternety lateur..._ The load after One Trillion Cycles is $$.'
         )
     }
 
