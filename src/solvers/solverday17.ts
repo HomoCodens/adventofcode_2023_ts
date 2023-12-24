@@ -10,12 +10,17 @@ enum Direction {
 }
 
 class StatefulNode extends Node2D {
+    private hashCache = ''
+
     constructor(x: number, y: number, public directionOfMovement: Direction, public straightStepsTaken: number = 1) {
         super(x, y)
     }
 
     override hash(): string {
-        return `${super.hash()};${this.directionOfMovement};${this.straightStepsTaken}`
+        if(this.hashCache === '') {
+            this.hashCache = `${super.hash()};${this.directionOfMovement};${this.straightStepsTaken}`
+        }
+        return this.hashCache
     }
 }
 
@@ -43,7 +48,10 @@ export default class SolverDay17 extends SolverBase<number[][]> {
         const height = input.length
         const goal = new StatefulNode(width - 1, height - 1, Direction.EAST)
         const oldElPatho = AStar<StatefulNode>(
-            new StatefulNode(0, 0, Direction.EAST),
+            [
+                new StatefulNode(0, 0, Direction.EAST),
+                new StatefulNode(0, 0, Direction.SOUTH),
+            ],
             goal,
             (node) => {
                 const { straightStepsTaken, directionOfMovement, x, y } = node
@@ -119,7 +127,7 @@ export default class SolverDay17 extends SolverBase<number[][]> {
                         break
                 }
 
-                return out.filter(({x, y}) => x >= 0 && x < input[0].length && y >= 0 && y < input.length)
+                return out.filter(({x, y}) => x >= 0 && x < width && y >= 0 && y < height)
             },
             (node, neighbor) => {
                 const { x, y } = neighbor
@@ -130,7 +138,7 @@ export default class SolverDay17 extends SolverBase<number[][]> {
             false
         )
 
-        console.log(this.drawPaff(input, oldElPatho))
+        // console.log(this.drawPaff(input, oldElPatho))
         
         return oldElPatho.slice(1).map(({x, y}) => input[y][x]).sum()
     }
