@@ -9,6 +9,11 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@datastructures-js/heap@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.npmjs.org/@datastructures-js/heap/-/heap-4.3.2.tgz"
+  integrity sha512-7/9QSsIZ+wMG3C9++mz9iOjdtTp9C036PISHvNjG3eyFO8nXOBJQFKgeV7M6/+EPl+oXXFRGBb8Ue60LsqTqGw==
+
 "@ljharb/through@^2.3.11":
   version "2.3.11"
   resolved "https://registry.npmjs.org/@ljharb/through/-/through-2.3.11.tgz"

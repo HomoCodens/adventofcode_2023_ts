@@ -9,6 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@datastructures-js/heap": "^4.3.2",
     "@mapbox/point-geometry": "^0.1.0",
     "@types/mapbox__point-geometry": "^0.1.4",
     "commander": "^11.1.0",
