@@ -80,13 +80,15 @@ export default class SolverDay02 extends SolverBase<CoobGame[]> {
 
     solvePartOne(input: CoobGame[]): Solvution {
         return new Solvution(
-            input.filter((g) => g.izLeegl(12, 13, 14)).reduce((acc: number, g: CoobGame) => acc + g.id, 0)
+            input.filter((g) => g.izLeegl(12, 13, 14)).reduce((acc: number, g: CoobGame) => acc + g.id, 0),
+            'With R12G13B14 the IDs of possible games sum to $$.'
         )
     }
 
     solvePartTwo(input: CoobGame[]): Solvution {
         return new Solvution(
-            input.map((g) => g.gitMaximinPower()).sum()
+            input.map((g) => g.gitMaximinPower()).sum(),
+            'The POWA of the minimul viable RGB sets is $$.'
         )
     }
 

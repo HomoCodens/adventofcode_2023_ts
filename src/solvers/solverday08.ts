@@ -42,9 +42,10 @@ export default class SolverDay08 extends SolverBase<DesertMap> {
     }
 
     solvePartOne(input: DesertMap): Solvution {
-        console.log(input)
+        // console.log(input)
         return new Solvution(
-            this.runYouBeautifulBoy(input)
+            this.runYouBeautifulBoy(input),
+            'Wandering thru the desert, we end up at the sleepy spot after $$ steps.'
         )
     }
     
@@ -52,7 +53,8 @@ export default class SolverDay08 extends SolverBase<DesertMap> {
         const aNodes = [...input.nodes.entries()].map(([id]) => id).filter((x) => x.endsWith('A'))
         const cycles = aNodes.map((n) => this.runYouSpectralBoi(input, n))
         return new Solvution(
-            cycles.reduce((acc, x) => math.lcm(acc, x))
+            cycles.reduce((acc, x) => math.lcm(acc, x)),
+            'Shedding this mortal shell and embracing the power of the ethereal, we all of us are at Zs after $$ steps.'
         )
     }
 

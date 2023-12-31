@@ -9,8 +9,11 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@datastructures-js/heap": "^4.3.2",
+    "@datastructures-js/queue": "^4.2.3",
     "@mapbox/point-geometry": "^0.1.0",
     "@types/mapbox__point-geometry": "^0.1.4",
+    "commander": "^11.1.0",
     "inquirer": "^9.2.12",
     "inquirer-press-to-continue": "^1.2.0",
     "mathjs": "^12.2.0"

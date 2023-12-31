@@ -1,3 +1,5 @@
+import * as maffs from 'mathjs'
+
 import SolverBase, { Solvution } from './solverbase'
 
 class Race {
@@ -10,10 +12,8 @@ class Race {
     }
 
     getNumberOfWaysToWin(): number {
-        // TODO: Better idea for later
-        //       solve for global max and threshold(s?) and count analytically
-        return (new Array(this.length)).fill(0).map((_, i) => i)
-                .filter((tPush) => (this.length - tPush)*tPush > this.record).length
+        const [lb, ub] = maffs.polynomialRoot(-this.record, this.length, -1)
+        return Number(maffs.subtract(maffs.floor(ub), maffs.ceil(lb))) + 1
     }
 }
 
@@ -21,7 +21,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
     static override day = 6
 
     prepareInput(rawInput: string): Race[] {
-        const [lengths, records, ..._]: number[][] = rawInput.lines().map((line) => line.csvNumbers(' ', /^\w+:/))
+        const [lengths, records, ..._]: number[][] = rawInput.lines().map((line) => line.csvNumbers(/ +/, /^\w+:/))
 
         return lengths.map((length, i) => new Race(length, records[i]))
     }
@@ -29,6 +29,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
     solvePartOne(input: Race[]): Solvution {
         return new Solvution(
             input.map((race) => race.getNumberOfWaysToWin()).prod(),
+            'Under the assumption that there are multiple races, the solution is $$.'
         )
     }
     
@@ -39,6 +40,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
         )
         return new Solvution(
             actualRace.getNumberOfWaysToWin(),
+            'In the MegaGigaRace there are $$ ways to win. Taking the best of course.'
         )
     }
 

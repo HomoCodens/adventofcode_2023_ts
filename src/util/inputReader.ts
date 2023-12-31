@@ -53,7 +53,7 @@ export class InputReader {
 
     private read(path: string): string {
         if(!fs.existsSync(path)) {
-            throw 'Catch!'
+            throw `Error reading file ${path}. Is it there?`
         }
     
         return fs.readFileSync(path).toString()

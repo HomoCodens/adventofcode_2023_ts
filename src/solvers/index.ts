@@ -8,6 +8,18 @@ import SolverDay07 from './solverday07'
 import SolverDay08 from './solverday08'
 import SolverDay09 from './solverday09'
 import SolverDay10 from './solverday10'
+import SolverDay11 from './solverday11'
+import SolverDay12 from './solverday12'
+import SolverDay13 from './solverday13'
+import SolverDay14 from './solverday14'
+import SolverDay15 from './solverday15'
+import SolverDay16 from './solverday16'
+import SolverDay17 from './solverday17'
+import SolverDay18 from './solverday18'
+import SolverDay19 from './solverday19'
+import SolverDay20 from './solverday20'
+import SolverDay21 from './solverday21'
+import SolverDay22 from './solverday22'
 
 const Solvers = [
     SolverDay01,
@@ -20,6 +32,18 @@ const Solvers = [
     SolverDay08,
     SolverDay09,
     SolverDay10,
+    SolverDay11,
+    SolverDay12,
+    SolverDay13,
+    SolverDay14,
+    SolverDay15,
+    SolverDay16,
+    SolverDay17,
+    SolverDay18,
+    SolverDay19,
+    SolverDay20,
+    SolverDay21,
+    SolverDay22,
 ]
 
 export default Solvers

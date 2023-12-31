@@ -32,11 +32,15 @@ if(options.example) {
 }
 
 console.log(`Begin crunching day ${day}`)
-solver.getBothSolutions(input)
-        .then(([part1, part2]) => {
+solver.getSolutionOne(input)
+        .then((part1) => {
             console.log('Part 1:')
             console.log(part1.fancyFunnyString)
             console.log()
+        })
+    
+solver.getSolutionTwo(input)
+        .then((part2) => {
             console.log('Part 2:')
             console.log(part2.fancyFunnyString)
         })

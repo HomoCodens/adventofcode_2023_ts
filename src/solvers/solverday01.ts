@@ -47,7 +47,7 @@ export default class SolverDay01 extends SolverBase<string[]> {
     }
 
     private getDigitsPartOne(line: string): [number, number] {
-        const numbers = line.csvNumbers('')
+        const numbers = line.csvNumbers('', null, true)
         const nNumbers = numbers.length
         return [
             numbers[0],
