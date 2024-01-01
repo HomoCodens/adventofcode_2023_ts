@@ -6,7 +6,8 @@
   "author": "HomoCodens <homocodens@github.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "ts-mocha"
   },
   "dependencies": {
     "@datastructures-js/heap": "^4.3.2",
@@ -19,7 +20,15 @@
     "mathjs": "^12.2.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.11",
     "@types/inquirer": "^9.0.7",
-    "@types/node": "^20.10.1"
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.1",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "chai": "^4.3.10",
+    "chai-asserttype": "^1.0.5",
+    "mocha": "^10.2.0",
+    "ts-mocha": "^10.0.0"
   }
 }

@@ -1,7 +1,5 @@
 import SolverBase, { Solvution } from './solverbase'
 import '../util/aochelpers'
-import { boolean, number } from 'mathjs'
-import { up } from 'inquirer/lib/utils/readline'
 
 class RockPattern {
     rows: number[]

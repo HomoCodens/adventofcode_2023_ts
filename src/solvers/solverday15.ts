@@ -12,7 +12,7 @@ abstract class Instruction {
     constructor(protected tag: string) {}
     
     static fromString(def: string): Instruction {
-        const [tag, focalLength, ..._] = def.split('=')
+        const [tag, focalLength] = def.split('=')
 
         if(focalLength) {
             return new Istruction(tag, Number.parseInt(focalLength))
@@ -105,7 +105,7 @@ class LavaPlace {
     // Don't ask me why I thought this was an angular thing until now... 🤦🏻
     constructor(private boxes: Bahks[], private instructions: Instruction[]) {}
 
-    static fromString(def: String): LavaPlace {
+    static fromString(def: string): LavaPlace {
         const boxes = Array.seq(256).map((i) => new Bahks(i))
         const instructions = def.csv(',', Instruction.fromString)
         return new LavaPlace(boxes, instructions)

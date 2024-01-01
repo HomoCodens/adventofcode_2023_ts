@@ -123,8 +123,9 @@ class SpringRow {
                 this.cloneAndSet(Spring.YES).collapseWaifVuncktion()
     }
 
+    // eslint-disable-next-line
     diagnosticPrint(msg: string): void {
-        //console.log(msg)
+        // console.log(msg)
     }
 
     cloneAndSet(what: Spring): SpringRow {

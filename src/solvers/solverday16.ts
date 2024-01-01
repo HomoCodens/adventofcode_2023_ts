@@ -1,7 +1,5 @@
 import Point from '@mapbox/point-geometry'
 import SolverBase, { Solvution } from './solverbase'
-import { pi } from 'mathjs'
-import { Dir } from 'fs'
 
 enum Direction {
     NORTH = '^',
@@ -56,7 +54,7 @@ abstract class Tile {
     }
 
     clone(): Tile {
-        let cloney = this.derivedClone() // smell that? it smells like a smell
+        const cloney = this.derivedClone() // smell that? it smells like a smell
         cloney.directionsVisitedIn = new Set([...this.directionsVisitedIn])
         return cloney
     }
@@ -134,11 +132,6 @@ class OpenSpace extends Tile {
     override derivedClone(): Tile {
         return new OpenSpace()
     }
-}
-
-type BeamState = {
-    position: Point,
-    facing: Direction
 }
 
 class Beam {
@@ -302,12 +295,12 @@ export default class SolverDay16 extends SolverBase<Tile[][]> {
     }
 
     runWith(beam: Beam, input: Tile[][]): Tile[][] {
-        let myVerld = this.cloneInput(input)
+        const myVerld = this.cloneInput(input)
         let meBeams = [beam]
 
-        let i = 0
+        // let i = 0
         while(meBeams.length > 0) {
-            i++
+            // i++
             // console.log(`\n\n=================\nRound ${i+1}\n=================\n`)
             meBeams = meBeams.flatMap((b) => b.step(myVerld)).filter((b) => b.active)
             // console.log(input.twoString())

@@ -18,7 +18,7 @@ class DesertMap {
     }
 
     static fromString(def: string): DesertMap {
-        const [instructions, blank, ...nodes] = def.lines()
+        const [instructions, , ...nodes] = def.lines()
 
         const nodeExpression = /(?<id>\w+) = \((?<L>\w+), (?<R>\w+)\)/
         const nodeObjects = nodes.map((nodeDef: string) => ({ ...nodeExpression.exec(nodeDef)?.groups } as DesertNode))
@@ -67,7 +67,7 @@ export default class SolverDay08 extends SolverBase<DesertMap> {
         let steps = 0
 
         while(currentNodeId !== 'ZZZ') {
-            let isntruction = map.directions[steps % map.directions.length]
+            const isntruction = map.directions[steps % map.directions.length]
             const currentNode = map.nodes.get(currentNodeId)
             currentNodeId = (currentNode as any)[isntruction]
             steps++
@@ -85,7 +85,7 @@ export default class SolverDay08 extends SolverBase<DesertMap> {
         let steps = 0
 
         while(!currentNodeId.endsWith('Z')) {
-            let isntruction = map.directions[steps % map.directions.length]
+            const isntruction = map.directions[steps % map.directions.length]
             const currentNode = map.nodes.get(currentNodeId)
             currentNodeId = (currentNode as any)[isntruction]
             steps++

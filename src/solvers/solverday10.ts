@@ -173,18 +173,21 @@ class Bend extends Pipe {
                 } else if(relativePos === RelativePosition.NORTH) {
                     return this.positionAt(RelativePosition.WEST)
                 }
+                break
             case Orientation.NTOE:
                 if(relativePos === RelativePosition.NORTH) {
                     return this.positionAt(RelativePosition.EAST)
                 } else if(relativePos === RelativePosition.EAST) {
                     return this.positionAt(RelativePosition.NORTH)
                 }
+                break
             case Orientation.ETOS:
                 if(relativePos === RelativePosition.EAST) {
                     return this.positionAt(RelativePosition.SOUTH)
                 } else if(relativePos === RelativePosition.SOUTH) {
                     return this.positionAt(RelativePosition.EAST)
                 }
+                break
             case Orientation.STOW:
                 if(relativePos === RelativePosition.SOUTH) {
                     return this.positionAt(RelativePosition.WEST)
@@ -212,7 +215,7 @@ class Bend extends Pipe {
 }
 
 class DeadEnd extends Pipe {
-    connectsTo(origin: RelativePosition): boolean {
+    connectsTo(): boolean {
         return false
     }
     
@@ -315,7 +318,7 @@ class Maze {
     }
 
     getPipesOnPath(): { [k: string]: Pipe } {
-        let path: any = {}
+        const path: any = {}
 
         const startPipe = this.getStartPipe()
         let currentPipe = startPipe
@@ -374,7 +377,7 @@ export default class SolverDay10 extends SolverBase<Maze> {
             })
         })
 
-        let chars = input.toChars()
+        const chars = input.toChars()
         innieOuties.forEach((line, row) => {
             line.forEach((pipe, col) => {
                 if(pipe !== ' ') {

@@ -37,7 +37,7 @@ export default class SolverDay01 extends SolverBase<string[]> {
             nine: 9
         }
 
-        for(let [human, compooter] of Object.entries(numberses)) {
+        for(const [human, compooter] of Object.entries(numberses)) {
             if(str.startsWith(human) || str.endsWith(human)) {
                 return compooter
             }

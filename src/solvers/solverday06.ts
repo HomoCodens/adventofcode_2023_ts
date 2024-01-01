@@ -21,7 +21,7 @@ export default class SolverDay06 extends SolverBase<Race[]> {
     static override day = 6
 
     prepareInput(rawInput: string): Race[] {
-        const [lengths, records, ..._]: number[][] = rawInput.lines().map((line) => line.csvNumbers(/ +/, /^\w+:/))
+        const [lengths, records]: number[][] = rawInput.lines().map((line) => line.csvNumbers(/ +/, /^\w+:/))
 
         return lengths.map((length, i) => new Race(length, records[i]))
     }

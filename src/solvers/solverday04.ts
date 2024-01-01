@@ -1,8 +1,8 @@
 import SolverBase, { Solvution } from './solverbase'
 
 class ScritchCard {
-    winningNumbers: Set<Number>
-    drawnNumbers: Set<Number>
+    winningNumbers: Set<number>
+    drawnNumbers: Set<number>
 
     get nMatches(): number {
         return [...this.winningNumbers].filter((number) => this.drawnNumbers.has(number)).length
@@ -16,7 +16,7 @@ class ScritchCard {
         }
     }
 
-    private constructor(winners: Set<Number>, havers: Set<Number>) {
+    private constructor(winners: Set<number>, havers: Set<number>) {
         this.winningNumbers = winners
         this.drawnNumbers = havers
     }
@@ -48,7 +48,7 @@ export default class SolverDay04 extends SolverBase<ScritchCard[]> {
     }
 
     solvePartTwo(input: ScritchCard[]): Solvution {
-        let tickets = (new Array(input.length)).fill(1)
+        const tickets = (new Array(input.length)).fill(1)
         for(let currentTicket = 0; currentTicket < input.length; currentTicket++) {
             const winnings = input[currentTicket].nMatches
             for(let nextTicket = currentTicket + 1; nextTicket <= currentTicket + winnings; nextTicket++) {

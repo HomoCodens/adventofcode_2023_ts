@@ -23,7 +23,8 @@ export default class SolverDay09 extends SolverBase<number[][][]> {
     }
 
     differentiate(sequence: number[]): number[][] {
-        let diffs = [ sequence ]
+        const diffs = [ sequence ]
+        // eslint-disable-next-line
         while(true) {
             const nextDiff = diffs[diffs.length - 1].reduce((diff: number[], x, i, arr): number[] => {
                 if(i > 0) {
@@ -41,13 +42,13 @@ export default class SolverDay09 extends SolverBase<number[][][]> {
     }
 
     getNextValueOf(diffs: number[][]): number {
-        let integrated = diffs.reduce((next, x) => next + x[x.length - 1], 0)
+        const integrated = diffs.reduce((next, x) => next + x[x.length - 1], 0)
 
         return integrated
     }
 
     getPreviousValueOf(diffs: number[][]): number {
-        let integrated = diffs.reduce((next, x) => x[0] - next, 0)
+        const integrated = diffs.reduce((next, x) => x[0] - next, 0)
 
         return integrated
     }

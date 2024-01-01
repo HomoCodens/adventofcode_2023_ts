@@ -56,7 +56,7 @@ export default class SolverDay17 extends SolverBase<number[][]> {
             (node) => {
                 const { straightStepsTaken, directionOfMovement, x, y } = node
 
-                let out = []
+                const out = []
                 switch(directionOfMovement) {
                     case Direction.NORTH:
                         if(straightStepsTaken < maxSteps) {

@@ -1,61 +1,30 @@
-import * as fs from 'fs'
-import path from 'path'
 import { padNumber } from './helpers'
+import FsThing from './fsthing'
+import { Input, InputWithKnownAnswer } from './input'
 
 export class InputReader {
-    private root: string
+    private fsHelper: FsThing
 
-    constructor(root: string = './input') {
-        this.root = root
+    constructor(root: string = './') {
+        this.fsHelper = new FsThing(root)
     }
 
     listExamples(day: number): string[] {
-        return fs.readdirSync(this.dayFolder(day))
-                    .filter((f) => f.match(/example\d+.txt/))
+        return this.fsHelper.listAvailableExampleFiles(day)
     }
 
     hasInput(day: number): boolean {
-        return fs.existsSync(path.join(this.dayFolder(day), 'input.txt'))
+        return this.fsHelper.fileExists(this.fsHelper.dayInput(day))
     }
 
-    readInput(day: number): string {
-        return this.read(path.join(
-            this.root,
-            `day${padNumber(day)}`,
-            'input.txt'
-        ))
+    readInput(day: number): Input {
+        return new Input(this.fsHelper.readFile(this.fsHelper.fileIn(this.fsHelper.dayInput(day), 'input.txt')))
     }
 
-    readExample(day: number, example: number): [string, string] {
-        // TODO: some sort of fancy self-verifying ExpectedSolution class
-        return [
-            this.read(
-                path.join(
-                    this.dayFolder(day),
-                    `example${padNumber(example)}.txt`
-                )
-            ),
-            this.read(
-                path.join(
-                    this.dayFolder(day),
-                    `example${padNumber(example)}.solution.txt`
-                )
-            )
-        ]
-    }
-
-    private dayFolder(day: number): string {
-        return path.join(
-            this.root,
-            `day${padNumber(day)}`
+    readExample(day: number, example: number): InputWithKnownAnswer {
+        return new InputWithKnownAnswer(
+            this.fsHelper.readFile(this.fsHelper.fileIn(this.fsHelper.dayInput(day), `example${padNumber(example)}.txt`)),
+            this.fsHelper.readFile(this.fsHelper.fileIn(this.fsHelper.dayInput(day), `example${padNumber(example)}.solution.txt`)).trim(),
         )
-    }
-
-    private read(path: string): string {
-        if(!fs.existsSync(path)) {
-            throw `Error reading file ${path}. Is it there?`
-        }
-    
-        return fs.readFileSync(path).toString()
     }
 }

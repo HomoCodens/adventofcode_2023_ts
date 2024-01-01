@@ -52,7 +52,7 @@ class Hand {
     }
 
     static fromString(def: string) {
-        const [hand, bet, ..._] = def.split(' ')
+        const [hand, bet] = def.split(' ')
         return new Hand(
             hand.split('').map((c) => new Card(c)),
             +bet
@@ -82,7 +82,7 @@ class Hand {
                                 }
                             }
                             return (new Array(n)).fill(n).map(() => new Card(cardValue))
-                        });
+                        })
     }
 
     handType(wildJoker: boolean = false): HandType {

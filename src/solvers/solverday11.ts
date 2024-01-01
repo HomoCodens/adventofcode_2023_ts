@@ -79,7 +79,7 @@ export default class SolverDay11 extends SolverBase<Verse> {
     solvePartOne(input: Verse): Solvution {
         return new Solvution(
             input.cumulativeDistances(1),
-            `An (inefficient) intergalactic salesman would be travelling for $$ steps.`,
+            'An (inefficient) intergalactic salesman would be travelling for $$ steps.',
         )
     }
     
