@@ -28,6 +28,15 @@ class RockPattern {
         return new RockPattern(rows, cols)
     }
 
+    toString(): string {
+        return this.rows.map((row) => {
+            let str = row.toString(2)
+            str = '.'.repeat(this.width - str.length) + str
+            return str
+        })
+        .map((str) => str.csv('', (chunk) => chunk === '1' ? '#' : '.')).twoString()
+    }
+
     private static bashBitsIntoNumber(bits: number[]): number {
         return bits.reduce((row: number, bit: number, exponent: number): number => row + bit*(2**exponent), 0)
     }
@@ -38,9 +47,12 @@ class RockPattern {
 
     findTheOtherOne(): number {
         const horizontal = this.findHorizontalMirrorage(true)
-        const vanillaHorizontal = this.findHorizontalMirrorage()
-        if(horizontal !== vanillaHorizontal) {
-            return horizontal
+        
+        if(horizontal > 0) {
+            const vanillaHorizontal = this.findHorizontalMirrorage()
+            if(horizontal !== vanillaHorizontal) {
+                return horizontal
+            }
         }
 
         return this.findVerticalMirrorage(true)
@@ -84,28 +96,28 @@ class RockPattern {
         }
 
         while(upwardFront >= 0 && downwardFront < strips.length) {
-            if((!smudge) && (strips[upwardFront] != strips[downwardFront])) {
-                return false
-            }
-
-            if(smudge) {
-                const differingBit = this.getDifferingBit(strips[upwardFront], strips[downwardFront])
-                if(differingBit > 0) {
-                    if(this.isMirroredAt(
-                        split,
-                        this.flipBitIn(strips, upwardFront, differingBit),
-                        false,
-                        upwardFront,
-                        downwardFront)) {
-                        return true
+            if(strips[upwardFront] !== strips[downwardFront]) {
+                if(smudge) {
+                    const differingBit = this.getDifferingBit(strips[upwardFront], strips[downwardFront])
+                    if(differingBit > 0) {
+                        return this.isMirroredAt(
+                                    split,
+                                    this.flipBitIn(strips, upwardFront, differingBit),
+                                    false,
+                                    upwardFront,
+                                    downwardFront
+                                )
                     }
                 }
+
+                return false
             }
 
             upwardFront--
             downwardFront++
         }
 
+        // If we get here and still expect a smudge this can't be the solution
         return !smudge
     }
 
@@ -114,9 +126,9 @@ class RockPattern {
         return aXORb && ((aXORb & (aXORb - 1)) === 0) ? aXORb : 0
     }
 
-    private flipBitIn(strips: number[], toFlip: number, bit: number): number[] {
+    private flipBitIn(strips: number[], toFlip: number, mask: number): number[] {
         const out = [...strips]
-        out[toFlip] = out[toFlip] ^ bit
+        out[toFlip] = out[toFlip] ^ mask
         return out
     }
 }
@@ -130,13 +142,15 @@ export default class SolverDay13 extends SolverBase<RockPattern[]> {
 
     solvePartOne(input: RockPattern[]): Solvution {
         return new Solvution(
-            input.map((pattern) => pattern.findMirrorageIndex()).sum()
+            input.map((pattern) => pattern.findMirrorageIndex()).sum(),
+            'The mirrorage index of all dem shiny surfaces is $$.'
         )
     }
     
     solvePartTwo(input: RockPattern[]): Solvution {
         return new Solvution(
-            input.map((pattern) => pattern.findTheOtherOne()).sum()
+            input.map((pattern) => pattern.findTheOtherOne()).sum(),
+            '*Scrub scrub* Oh wait, it\'s $$!'
         )
     }
 

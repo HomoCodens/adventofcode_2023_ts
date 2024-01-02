@@ -23,6 +23,7 @@ export class Solvution {
 }
 
 export default abstract class SolverBase<T> {
+    // TODO: have 'crunching day xx' be customizable
     static day: number
 
     abstract prepareInput(rawInput: string): T
