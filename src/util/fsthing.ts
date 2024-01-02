@@ -7,7 +7,7 @@ export default class FsThing {
     constructor(private root: string) {}
 
     get solversRoot(): string {
-        return path.join(this.root, 'src')
+        return path.join(this.root, 'src', 'solvers')
     }
 
     get inputsRoot(): string {

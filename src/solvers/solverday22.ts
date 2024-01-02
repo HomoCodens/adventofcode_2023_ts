@@ -1,22 +1,6 @@
+import Point3D from '../util/point3d'
 import SolverBase, { Solvution } from './solverbase'
 import * as maffs from 'mathjs'
-
-class Point3D {
-    constructor(public x: number, public y: number, public z: number) {}
-    
-    static fromString(def: string): Point3D {
-        const [x, y, z] = def.split(',')
-        return new Point3D(+x, +y, +z)
-    }
-
-    toWastl(): string {
-        return `${this.x},${this.y},${this.z}`
-    }
-
-    clooney(): Point3D {
-        return new Point3D(this.x, this.y, this.z)
-    }
-}
 
 class Brik {
     public id: string = 'unidentifiedLyingObject'
