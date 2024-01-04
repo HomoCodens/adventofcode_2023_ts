@@ -105,13 +105,21 @@ class Shwarf {
     // after each step: check which are in the same location and smoosh them together
     // plots CAN be visited multiple times!
     shmoosh(nSteps: number): number {
-        let edge: { [k in string]: Point } = {}
-        edge[this.startingLocation.hatshi()] = this.startingLocation
+        type EdgeEntry = { location: Point, nShwarves: number }
+        let edge: { [k in string]: EdgeEntry } = {}
+        edge[this.startingLocation.hatshi()] = {
+            location: this.startingLocation,
+            nShwarves: 1
+        }
 
         for(let i = 0; i < nSteps; i++) {
-            let nextEdge: { [k in string]: Point} = {}
-            Object.values(edge).forEach((location) => {
-                this.shwarfDom.getVisitableNeighbours(location).forEach((location) => nextEdge[location.hatshi()] = location)
+            let nextEdge: { [k in string]: EdgeEntry} = {}
+            Object.values(edge).forEach((entry) => {
+                this.shwarfDom.getVisitableNeighbours(entry.location)
+                                .forEach((location) => nextEdge[location.hatshi()] = {
+                                    location,
+                                    nShwarves: (nextEdge[location.hatshi()]?.nShwarves || 0) + entry.nShwarves
+                                })
             })
             console.log(`step ${i + 1}`)
             console.log(this.shwarfDom.toString(nextEdge))
