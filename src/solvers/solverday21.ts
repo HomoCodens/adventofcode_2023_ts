@@ -1,17 +1,9 @@
+import Point from '@mapbox/point-geometry'
 import SolverBase, { Solvution } from './solverbase'
 
-// k, this may be going a bit far calling this Point but not being the other one
-class Point {
-    constructor(public x: number, public y: number) {}
-
-    hatshi(): string {
-        return `${this.x};${this.y}`
-    }
-}
+const hashPoint = (p: Point) => `${p.x};${p.y}`
 
 class Plot {
-    isStart = false
-    
     constructor(public visitable: boolean) {}
 
     static fromString(def: string): Plot {
@@ -32,6 +24,8 @@ class Plot {
 }
 
 class Garden {
+    private visitabilityCache: Map<string, Point[]> = new Map()
+
     constructor(private plots: Plot[][]) {}
 
     get width(): number {
@@ -44,24 +38,47 @@ class Garden {
 
     isVisitable(location: Point): boolean {
         const { x, y } = this.wrap(location)
-        console.log(`checking visitability of ${location.hatshi()} (really ${this.wrap(location).hatshi()})`)
         return this.plots[y][x].visitable
     }
 
     wrap({x, y}: Point) {
+        let wrappedX = x % this.width
+        if(wrappedX < 0) {
+            wrappedX += this.width
+        }
+
+        let wrappedY = y % this.height
+        if(wrappedY < 0) {
+            wrappedY += this.height
+        }
+
         return new Point(
-            x < 0 ? x % this.width + this.width : x % this.width,
-            y < 0 ? y % this.height + this.height : y % this.height
+            wrappedX,
+            wrappedY,
         )
     }
 
-    getVisitableNeighbours({ x, y }: Point): Point[] {
-        const neighbours = [
-            new Point(x - 1, y),
-            new Point(x + 1, y),
-            new Point(x, y - 1),
-            new Point(x, y + 1),
-        ]
+    getVisitableNeighbours(point: Point, origin: Point): Point[] {
+        const neighbours: Point[] = []
+
+        const { x, y } = point
+        const UP = new Point(x, y - 1)
+        const DOWN = new Point(x, y + 1)
+        const LEFT = new Point(x - 1, y)
+        const RIGHT = new Point(x + 1, y)
+        
+        if(point.y >= origin.y) {
+            neighbours.push(DOWN)
+        }
+        if(point.y <= origin.y) {
+            neighbours.push(UP)
+        }
+        if(point.x >= origin.x) {
+            neighbours.push(RIGHT)
+        }
+        if(point.x <= origin.x) {
+            neighbours.push(LEFT)
+        }
 
         return neighbours.filter((location) => this.isVisitable(location))
     }
@@ -74,7 +91,7 @@ class Garden {
                 }
 
                 const at = new Point(j, i)
-                return occupiedLocations[at.hatshi()] ? 'O' : '.'
+                return occupiedLocations[hashPoint(at)] ? 'O' : '.'
             }).join('')
         }).join('\n')
     }
@@ -101,33 +118,57 @@ class Shwarf {
         return `Started at ${JSON.stringify(this.startingLocation)}\n\n` + this.shwarfDom.toString({})
     }
 
-    // instead of creating a bajillion shwarves each tracking their individual paths
-    // after each step: check which are in the same location and smoosh them together
-    // plots CAN be visited multiple times!
-    shmoosh(nSteps: number): number {
-        type EdgeEntry = { location: Point, nShwarves: number }
-        let edge: { [k in string]: EdgeEntry } = {}
-        edge[this.startingLocation.hatshi()] = {
-            location: this.startingLocation,
-            nShwarves: 1
+    walk(nSteps: number): number {
+        let nEvens = 0
+        let nOdds = 1
+
+        const seen = {
+            top: 0,
+            left: -1,
+            bottom: this.shwarfDom.height,
+            right: this.shwarfDom.width,
         }
 
-        for(let i = 0; i < nSteps; i++) {
-            let nextEdge: { [k in string]: EdgeEntry} = {}
-            Object.values(edge).forEach((entry) => {
-                this.shwarfDom.getVisitableNeighbours(entry.location)
-                                .forEach((location) => nextEdge[location.hatshi()] = {
-                                    location,
-                                    nShwarves: (nextEdge[location.hatshi()]?.nShwarves || 0) + entry.nShwarves
-                                })
+        let edge: Map<string, Point> = new Map()
+        edge.set(hashPoint(this.startingLocation), this.startingLocation)
+        for(let step = 1; step <= nSteps; step++) {
+            //console.log(`step ${step}, edge length: ${edge.size}, total plots visited: ${nEvens + nOdds}`)
+            const nEdge = new Map<string, Point>()
+            edge.forEach((location) => {
+                this.shwarfDom.getVisitableNeighbours(location, new Point(65, 65)).forEach((neighbour) => {
+                    if(neighbour.x === seen.left) {
+                        console.log('left')
+                        console.log(neighbour)
+                        seen.left -= this.shwarfDom.width
+                    }
+                    if(neighbour.x === seen.right) {
+                        console.log('right')
+                        console.log(neighbour)
+                        seen.right += this.shwarfDom.width
+                    }
+                    if(neighbour.y === seen.top) {
+                        console.log('top')
+                        console.log(neighbour)
+                        seen.top -= this.shwarfDom.height
+                    }
+                    if(neighbour.y === seen.bottom) {
+                        console.log('bottom')
+                        console.log(neighbour)
+                        seen.bottom += this.shwarfDom.height
+                    }
+                    nEdge.set(hashPoint(neighbour), neighbour)
+                    if(step % 2) {
+                        nOdds++
+                    } else {
+                        nEvens++
+                    }
+                })
             })
-            console.log(`step ${i + 1}`)
-            console.log(this.shwarfDom.toString(nextEdge))
-            console.log()
-            edge = nextEdge
+
+            edge = nEdge
         }
 
-        return Object.keys(edge).length
+        return (nSteps % 2) ? nOdds : nEvens
     }
 }
 
@@ -139,14 +180,16 @@ export default class SolverDay21 extends SolverBase<Shwarf> {
     }
 
     solvePartOne(input: Shwarf): Solvution {
+        console.log(input.toString())
         return new Solvution(
-            input.shmoosh(5000)
+            5//input.walk(64)
         )
     }
     
     solvePartTwo(input: Shwarf): Solvution {
+        input.startingLocation = new Point(-1, 65)
         return new Solvution(
-            'Answer goes here'
+            input.walk(600) //input.walk(26_501_365)
         )
     }
 
