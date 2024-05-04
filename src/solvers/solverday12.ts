@@ -11,7 +11,7 @@ class SpringRow {
     private runPointer: number = 0
     private currentRun: number = 0
     private springLength: number
-    private nRuns:number
+    private nRuns: number
 
     constructor(private springs: Spring[], private targetRuns: number[]) {
         this.springLength = springs.length
@@ -46,86 +46,64 @@ class SpringRow {
         return springPointerString + ' ' + runPointerString + '\n' + normalString
     }
 
-    collipse(currentElement: Spring,
-                springPointer: number = 0,
-                currentRun: number = 0,
-                runPointer: number = 0): number {
-                    if(currentElement === Spring.NO) {
-                        currentRun++
-                        if(runPointer >= this.nRuns) {
-                            return 0
-                        }
-
-                        if(currentRun > this.targetRuns[runPointer]) {
-                            return 0
-                        }
-                    } else if(currentRun > 0 && currentElement === Spring.YES) {
-                        if(currentRun !== this.targetRuns[runPointer]) {
-                            return 0
-                        }
-
-                        currentRun = 0
-                        runPointer++
-                    }
-
-                    springPointer++
-                    const nextElement = this.springs[springPointer]
-                    if(nextElement === Spring.MAYBE) {
-                        return this.collipse(Spring.NO, springPointer, currentRun, runPointer) +
-                                this.collipse(Spring.YES, springPointer, currentRun, runPointer)
-                    } else {
-                        return this.collipse(nextElement, springPointer, currentRun, runPointer)
-                    }
-                }
-
-    collapseWaifVuncktion(): number {
-        while(this.springPointer < this.springLength &&
-                this.springs[this.springPointer] !== Spring.MAYBE) {
-            
-            if(this.springs[this.springPointer] === Spring.NO) {
-                this.currentRun++
-                // Discovered a run where there should be no more
-                if(this.runPointer >= this.nRuns) {
-                    this.diagnosticPrint('\nexiting early because run began but no more expected')
-                    this.diagnosticPrint(this.toDiagnosticsString())
-                    return 0
-                }
-                
-                // Exceeded expected length of next run
-                if(this.currentRun > this.targetRuns[this.runPointer]) {
-                    this.diagnosticPrint('\nexiting early because run too long')
-                    this.diagnosticPrint(this.toDiagnosticsString())
-                    return 0
-                }
-            } else if(this.currentRun > 0 && this.springs[this.springPointer] === Spring.YES) {
-                // Finished a run of the fronk length
-                if(this.currentRun !== this.targetRuns[this.runPointer]) {
-                    this.diagnosticPrint('\nexiting early because ended run of wrong length')
-                    this.diagnosticPrint(this.toDiagnosticsString())
-                    return 0
-                }
-                this.currentRun = 0
-                this.runPointer++
-            }
+    runDown(): number {
+        while(this.springs[this.springPointer] == Spring.YES) { 
             this.springPointer++
         }
-        
-        if(this.springPointer >= this.springLength) {
-            const out = (this.runPointer >= this.nRuns || (this.runPointer === (this.nRuns - 1) && this.currentRun === this.targetRuns[this.runPointer])) ? 1 : 0
-            this.diagnosticPrint(`\nreturning ${out} because`)
-            this.diagnosticPrint(this.toDiagnosticsString())
-            return out
+
+        if(this.springPointer == this.springLength + 1) {
+            return 0
         }
-        
-        // See, this is why I have difficulties with OO..
-        // (not saying these lines could not be written better in an oo way. ;))
-        return this.cloneAndSet(Spring.NO).collapseWaifVuncktion() +
-                this.cloneAndSet(Spring.YES).collapseWaifVuncktion()
+
+        if(this.springs[this.springPointer] == Spring.NO) {
+            let afterRun = this.springPointer + this.targetRuns[this.runPointer]
+
+            if(afterRun > this.springLength) {
+                return 0
+            }
+
+            while(this.springPointer < afterRun) {
+                if(this.springs[this.springPointer] == Spring.YES) {
+                    return 0
+                }
+
+                this.springs[this.springPointer] = Spring.NO
+                this.springPointer++
+            }
+
+            if(this.springs[this.springPointer] == Spring.NO) {
+                return 0
+            }
+
+            this.runPointer++
+            if(this.runPointer == this.nRuns) {
+                if(this.springs.slice(this.springPointer).some(s => s == Spring.NO)) {
+                    return 0
+                }
+
+                return 1
+            }
+
+            let remainingRuns = this.targetRuns.slice(this.runPointer)
+            let remainingSpotsNeeded = remainingRuns.sum() + remainingRuns.length - 1
+            let remainingSpots = this.springLength - this.springPointer
+            if(remainingSpotsNeeded > remainingSpots) {
+                return 0
+            }
+
+            this.springs[this.springPointer] = Spring.YES
+            this.springPointer++
+            return this.runDown()
+        } else {
+            return this.cloneAndSet(Spring.YES).runDown() +
+                    this.cloneAndSet(Spring.NO).runDown()
+        }
+
     }
 
     // eslint-disable-next-line
     diagnosticPrint(msg: string): void {
-        // console.log(msg)
+        console.log(msg)
     }
 
     cloneAndSet(what: Spring): SpringRow {
@@ -170,47 +148,19 @@ class SpringField {
 
     do(): number {
         return this.springRows.map((s) => {
-            // console.log(s.toString())
-            return s.collapseWaifVuncktion()
+            console.log(s.toString())
+            let combs = s.runDown()
+            console.log(`that makes ${combs} possibilities\n`)
+            return combs
         }).sum()
     }
 
     doo(): number {
         return this.springRows.map((s, i) => {
             console.log(i)
-            return s.quintupplecate().collapseWaifVuncktion()
+            return s.quintupplecate().runDown()
         }).sum()
     }
-
-    dodelidoo(): void {
-        this.springRows.forEach((s, i) => {
-            const singul = s.collapseWaifVuncktion()
-            const dubbul = s.duppelcate().collapseWaifVuncktion()
-            const tribbul = s.trippelcate().collapseWaifVuncktion()
-            console.log(i)
-            console.log(s.toString())
-            console.log(singul)
-            console.log(s.duppelcate().toString())
-            console.log(dubbul)
-            console.log(s.trippelcate().toString())
-            console.log(tribbul)
-            console.log(`1 -> 2: ${dubbul/singul}, 2 -> 3: ${tribbul/dubbul}`)
-            console.log()
-        })
-    }
-
-    /*do2(): number {
-        return this.springRows.map(({ springs, runs }) => {
-            return new SpringRow(
-                [...springs, Spring.MAYBE, ...springs, Spring.MAYBE,
-                ...springs, Spring.MAYBE, ...springs, Spring.MAYBE, ...springs],
-                [...runs, ...runs, ...runs, ...runs, ...runs]
-            )
-        }).map((uberSpringRow, i) => {
-            // console.log(i)
-            return uberSpringRow.collapseWaifVuncktion()
-        }).sum()
-    }*/
 }
 
 export default class SolverDay12 extends SolverBase<SpringField> {
