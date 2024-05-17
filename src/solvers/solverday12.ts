@@ -35,70 +35,94 @@ class SpringRow {
         return this.springs.map((s) => s.toString()).join('') + ' ' + this.targetRuns.join(',')
     }
     
-    toDiagnosticsString(): string {
-        const normalString = this.toString()
-        let springPointerString = ' '.repeat(this.springPointer) + 'v'
-        const springPointerPaddy = this.springLength - this.springPointer - 1
-        if(springPointerPaddy > 0) {
-            springPointerString += ' '.repeat(springPointerPaddy)
-        }
-        const runPointerString = ' '.repeat(2*this.runPointer) + 'v'
-        return springPointerString + ' ' + runPointerString + '\n' + normalString
+    toDiagnosticsString(chonkhPositions: number[]): string {
+        const springString = this.toString()
+        const positionsWithIndex = chonkhPositions.map((p, i) => ({p, i})).filter(({p}) => p >= 0)
+        const chonkhPointers = positionsWithIndex.map(({p, i}) => {
+            let nSpaces = Math.max(p - 1, 0)
+            if(i > 0) {
+                nSpaces -= positionsWithIndex[i - 1].p
+            }
+            return ' '.repeat(nSpaces) + 'v'
+        }).join('')
+        const chonkhSizes = positionsWithIndex.map(({p, i}) => {
+            let nSpaces = Math.max(p - 1, 0)
+            if(i > 0) {
+                nSpaces -= positionsWithIndex[i - 1].p
+            }
+            return ' '.repeat(nSpaces) + this.targetRuns[i]
+        }).join('')
+        return `${chonkhSizes}\n${chonkhPointers}\n${springString}`
     }
 
-    runDown(): number {
-        while(this.springs[this.springPointer] == Spring.YES) { 
-            this.springPointer++
+    runDown(chonkh: number = 0,
+            startPosition: number = 0,
+            caysh: number[][] = [],
+            positions: number[] = Array.fillN(this.nRuns, -1)): number {
+        
+        if(!caysh[chonkh]) {
+            caysh[chonkh] = []
         }
 
-        if(this.springPointer == this.springLength + 1) {
+        // console.log(`checking with ${chonkh}, ${positions}`)
+        // console.log(this.toDiagnosticsString(positions))
+
+        if(caysh[chonkh] && caysh[chonkh][startPosition] !== undefined) {
+            // console.log(`Hitted the cash for chonkh ${chonkh} at ${startPosition}: ${caysh[chonkh][startPosition]}`)
+            return caysh[chonkh][startPosition]
+        }
+
+        const chonkhSize = this.targetRuns[chonkh]
+        if(startPosition + chonkhSize > this.springLength) {
+            // console.log('down but no sigar')
+            caysh[chonkh][startPosition] = 0
             return 0
         }
 
-        if(this.springs[this.springPointer] == Spring.NO) {
-            let afterRun = this.springPointer + this.targetRuns[this.runPointer]
-
-            if(afterRun > this.springLength) {
-                return 0
-            }
-
-            while(this.springPointer < afterRun) {
-                if(this.springs[this.springPointer] == Spring.YES) {
-                    return 0
-                }
-
-                this.springs[this.springPointer] = Spring.NO
-                this.springPointer++
-            }
-
-            if(this.springs[this.springPointer] == Spring.NO) {
-                return 0
-            }
-
-            this.runPointer++
-            if(this.runPointer == this.nRuns) {
-                if(this.springs.slice(this.springPointer).some(s => s == Spring.NO)) {
-                    return 0
-                }
-
+        if(chonkh >= this.nRuns) {
+            // console.log('returning an one')
+            if(!this.springs.slice(startPosition).some(s => s === Spring.NO)) {
+                // console.log('works')
                 return 1
-            }
-
-            let remainingRuns = this.targetRuns.slice(this.runPointer)
-            let remainingSpotsNeeded = remainingRuns.sum() + remainingRuns.length - 1
-            let remainingSpots = this.springLength - this.springPointer
-            if(remainingSpotsNeeded > remainingSpots) {
+            } else {
+                caysh[chonkh][startPosition] = 0
                 return 0
             }
-
-            this.springs[this.springPointer] = Spring.YES
-            this.springPointer++
-            return this.runDown()
-        } else {
-            return this.cloneAndSet(Spring.YES).runDown() +
-                    this.cloneAndSet(Spring.NO).runDown()
         }
 
+        const remainingRuns = this.targetRuns.slice(chonkh + 1)
+        const maxStartPosition = this.springLength - (remainingRuns.sum() + remainingRuns.length - 1 + chonkhSize)
+        const anchor = this.springs.findIndex((s, i) => s === Spring.NO && i >= startPosition)
+        const lastStartPosition = anchor == -1 ? maxStartPosition : anchor
+
+        let chonkhPosition = this.settleChonkh(chonkhSize, startPosition, lastStartPosition)
+        let totalPermutations = 0
+        while(chonkhPosition <= lastStartPosition) {
+            const positiones = [...positions.slice(0, chonkh), chonkhPosition, ...positions.slice(chonkh + 1)]
+            const validPermutations = this.runDown(chonkh + 1, chonkhPosition + chonkhSize + 1, caysh, positiones)
+            totalPermutations += validPermutations
+
+            chonkhPosition = this.settleChonkh(chonkhSize, chonkhPosition + 1, lastStartPosition)
+        }
+
+        caysh[chonkh][startPosition] = totalPermutations
+
+        return totalPermutations
+    }
+
+    settleChonkh(runLength: number, startPosition: number, maxPosition: number) {
+        let settledPosition = startPosition
+        while(!this.chonkhCanSit(runLength, settledPosition) &&
+                settledPosition <= maxPosition) {
+            settledPosition++
+        }
+        return this.chonkhCanSit(runLength, settledPosition) ? settledPosition : this.springLength + 1
+    }
+
+    chonkhCanSit(runLength: number, position: number) {
+        return (position + runLength <= this.springLength) &&
+                !this.springs.slice(position, position + runLength).some(x => x == Spring.YES) &&
+                !((position + runLength < this.springLength) && this.springs[position + runLength] == Spring.NO)
     }
 
     // eslint-disable-next-line

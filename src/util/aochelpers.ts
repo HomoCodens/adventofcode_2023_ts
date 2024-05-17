@@ -68,8 +68,16 @@ Array.prototype.twoString = function(elementSep: string = '', lineSep: string = 
     return this.map((line) => line.join(elementSep)).join(lineSep)
 }
 
+Array.prototype.toSpliced = function(start: number, deleteCount: number, ...items: any[]) {
+    return this.slice().splice(start, deleteCount, ...items)
+}
+
 Array.seq = function(length: number) {
     return new Array(length).fill(0).map((_, i) => i)
+}
+
+Array.fillN = function(length: number, value: any) {
+    return new Array(length).fill(value)
 }
 
 export const manhattanDistance = (a: Location2D, b: Location2D) => Math.abs(a.x - b.x)  + Math.abs(a.y - b.y)

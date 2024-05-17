@@ -7,12 +7,14 @@ declare interface String {
 
 declare interface ArrayConstructor {
     seq(length: number): number[],
+    fillN(length: number, value: any): any[]
 }
 declare interface Array {
     sum(): number,
     prod(): number,
     unique(): Array,
     twoString(elementSep: string = '', lineSep: string = '\n'): string,
+    toSpliced(start: number, deleteCount: number, ...items: any[]),
 }
 
 declare interface Location2D {
