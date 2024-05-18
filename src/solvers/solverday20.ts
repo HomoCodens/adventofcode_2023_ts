@@ -1,4 +1,12 @@
+import { lcm } from 'mathjs'
 import SolverBase, { Solvution } from './solverbase'
+
+enum ModuleType {
+    'flipflip',
+    'conjunction',
+    'brotkasten',
+    'holeOfBlackness',
+}
 
 type Pulse = {
     targets?: string[],
@@ -14,7 +22,8 @@ abstract class Module {
     static FLIPFLIP = '%'
     static CONJUNCTION = '&'
 
-    abstract type: string
+    abstract type: ModuleType
+    inputs: string[] = []
 
     static fromString(def: string): Module {
         console.log(def)
@@ -39,7 +48,9 @@ abstract class Module {
     
     abstract excite(sender: string, pulse: boolean): boolean | undefined
     
-    registerInput(input: string) { }
+    registerInput(input: string) {
+        this.inputs.push(input)
+    }
 
     poke(sender: string, pulse: boolean): Pulse {
         const meSponse = this.excite(sender, pulse)
@@ -59,7 +70,7 @@ abstract class Module {
 }
 
 class FlippedyFloppedy extends Module {
-    override type = 'flipflip'
+    override type = ModuleType.flipflip
     state = false
     
     override excite(sender: string, pulse: boolean): boolean | undefined {
@@ -73,8 +84,8 @@ class FlippedyFloppedy extends Module {
 }
 
 class Conjunctivication extends Module {
-    state: any = {}
-    override type = 'conjunction'
+    state: { [key in string]: boolean} = {}
+    override type = ModuleType.conjunction
     
     override excite(sender: string, pulse: boolean): boolean | undefined {
         this.state[sender] = pulse
@@ -86,13 +97,14 @@ class Conjunctivication extends Module {
     }
 
     registerInput(id: string) {
+        super.registerInput(id)
         this.state[id] = false
     }
 }
 
 // Hi to all my friends from <Nerezza>!
 class BrotKasten extends Module {
-    override type = 'brotkasten'
+    override type = ModuleType.brotkasten
 
     override excite(sender: string, pulse: boolean): boolean | undefined {
         return pulse
@@ -100,7 +112,7 @@ class BrotKasten extends Module {
 }
 
 class Sink extends Module {
-    override type = 'holeOfBlackness'
+    override type = ModuleType.holeOfBlackness
 
     constructor(id: string) {
         super(id, [])
@@ -114,7 +126,8 @@ class Sink extends Module {
 class Masheen {
     lowPulsesSended = 0
     highPulsesSended = 0
-    rxHitSinglely = false
+    findies: {[k in string] : number } = {}
+    nPushes = 0
 
     nextPulses: Pulse[] = []
     
@@ -126,10 +139,7 @@ class Masheen {
 
         Object.values(modules).forEach((module) => {
             module.targets.forEach((targetId) => {
-                const derGet = modules[targetId]
-                if(derGet && derGet.type === 'conjunction') {
-                    derGet.registerInput(module.id)
-                }
+                modules[targetId].registerInput(module.id)
             })
         });
     }
@@ -142,11 +152,15 @@ class Masheen {
     }
 
     findRx(): number {
-        let nPushes = 0
-        while(true) {
-            console.log(++nPushes)
+        // Assuming all the masheens are build like that
+        const inputsOfRxInput = this.modules[this.modules['rx'].inputs[0]].inputs
+        inputsOfRxInput.forEach((i) => this.findies[i] = 0)
+
+        while(Object.values(this.findies).some((x) => x === 0)) {
             this.pushTheButtonPuPushTheButton()
         }
+        
+        return Object.values(this.findies).reduce((acc: number, pushes: number): number => lcm(acc, pushes))
     }
 
     pushTheButtonPuPushTheButton() {
@@ -156,16 +170,23 @@ class Masheen {
             fires: true,
             sender: 'butten',
         }]
+
+        this.nPushes++
         
         this.lowPulsesSended += 1
 
         while(this.nextPulses.length) {
             this.step()
             
-            const pulsesToRx = this.nextPulses.filter(({ targets }) => targets?.includes('rx'))
-            if(pulsesToRx.length === 1 && pulsesToRx[0].onOffity === false) {
-                this.rxHitSinglely = true
-            }
+            Object.keys(this.findies).forEach((f) => {
+                if(this.findies[f] === 0)
+                {
+                    const pulsesToFindie = this.nextPulses.filter(({ targets }) => targets?.includes(f))
+                    if(pulsesToFindie.length > 0 && pulsesToFindie.some((p) => p.onOffity === false)) {
+                        this.findies[f] = this.nPushes
+                    } 
+                }
+            })
         }
 
     }
@@ -184,6 +205,15 @@ class Masheen {
                 return response
             })
         }).filter(({ fires }) => fires)
+    }
+
+    toGraphViz(): string {
+        const entries = Object.values(this.modules).flatMap((mod) => {
+            const {id, targets, type} = mod
+            const label = `"${type === ModuleType.conjunction ? '&' : type === ModuleType.flipflip ? '%' : ''}${id}"`
+            return [`  ${mod.id} [label=${label}]`, ...targets.map((t) => `  ${id} -> ${t}`)]
+        })
+        return `digraph masheen {\n${entries.join('\n')}\n}`
     }
 }
 
@@ -205,7 +235,8 @@ export default class SolverDay20 extends SolverBase<Masheen> {
     
     solvePartTwo(input: Masheen): Solvution {
         return new Solvution(
-            input.findRx()
+            input.findRx(),
+            '$$ pushes. Phew, thats gonna take a while..'
         )
     }
 
