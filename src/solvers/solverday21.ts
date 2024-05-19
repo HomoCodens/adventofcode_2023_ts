@@ -24,8 +24,6 @@ class Plot {
 }
 
 class Garden {
-    private visitabilityCache: Map<string, Point[]> = new Map()
-
     constructor(private plots: Plot[][]) {}
 
     get width(): number {
@@ -37,28 +35,11 @@ class Garden {
     }
 
     isVisitable(location: Point): boolean {
-        const { x, y } = this.wrap(location)
-        return this.plots[y][x].visitable
+        const { x, y } = location
+        return this.plots[y] && this.plots[y][x] && this.plots[y][x].visitable
     }
 
-    wrap({x, y}: Point) {
-        let wrappedX = x % this.width
-        if(wrappedX < 0) {
-            wrappedX += this.width
-        }
-
-        let wrappedY = y % this.height
-        if(wrappedY < 0) {
-            wrappedY += this.height
-        }
-
-        return new Point(
-            wrappedX,
-            wrappedY,
-        )
-    }
-
-    getVisitableNeighbours(point: Point, origin: Point): Point[] {
+    getVisitableNeighbours(point: Point): Point[] {
         const neighbours: Point[] = []
 
         const { x, y } = point
@@ -67,23 +48,10 @@ class Garden {
         const LEFT = new Point(x - 1, y)
         const RIGHT = new Point(x + 1, y)
         
-        if(point.y >= origin.y) {
-            neighbours.push(DOWN)
-        }
-        if(point.y <= origin.y) {
-            neighbours.push(UP)
-        }
-        if(point.x >= origin.x) {
-            neighbours.push(RIGHT)
-        }
-        if(point.x <= origin.x) {
-            neighbours.push(LEFT)
-        }
-
-        return neighbours.filter((location) => this.isVisitable(location))
+        return [UP, DOWN, LEFT, RIGHT].filter((location) => this.isVisitable(location))
     }
 
-    toString(occupiedLocations: any): string {
+    toString(occupiedLocations: Map<string, Point>): string {
         return this.plots.map((row, i) => {
             return row.map((plot, j) => {
                 if(!plot.visitable) {
@@ -91,7 +59,7 @@ class Garden {
                 }
 
                 const at = new Point(j, i)
-                return occupiedLocations[hashPoint(at)] ? 'O' : '.'
+                return occupiedLocations.has(hashPoint(at)) ? 'O' : '.'
             }).join('')
         }).join('\n')
     }
@@ -114,61 +82,52 @@ class Shwarf {
         return new Shwarf(new Garden(garden), startingLocation!);
     }
 
-    toString(): string {
-        return `Started at ${JSON.stringify(this.startingLocation)}\n\n` + this.shwarfDom.toString({})
+    toString(occupiedLocations: Map<string, Point>): string {
+        return `Started at ${JSON.stringify(this.startingLocation)}\n\n` + this.shwarfDom.toString(occupiedLocations)
     }
 
     walk(nSteps: number): number {
-        let nEvens = 0
-        let nOdds = 1
-
-        const seen = {
-            top: 0,
-            left: -1,
-            bottom: this.shwarfDom.height,
-            right: this.shwarfDom.width,
-        }
-
         let edge: Map<string, Point> = new Map()
         edge.set(hashPoint(this.startingLocation), this.startingLocation)
+
         for(let step = 1; step <= nSteps; step++) {
-            //console.log(`step ${step}, edge length: ${edge.size}, total plots visited: ${nEvens + nOdds}`)
             const nEdge = new Map<string, Point>()
-            edge.forEach((location) => {
-                this.shwarfDom.getVisitableNeighbours(location, new Point(65, 65)).forEach((neighbour) => {
-                    if(neighbour.x === seen.left) {
-                        console.log('left')
-                        console.log(neighbour)
-                        seen.left -= this.shwarfDom.width
-                    }
-                    if(neighbour.x === seen.right) {
-                        console.log('right')
-                        console.log(neighbour)
-                        seen.right += this.shwarfDom.width
-                    }
-                    if(neighbour.y === seen.top) {
-                        console.log('top')
-                        console.log(neighbour)
-                        seen.top -= this.shwarfDom.height
-                    }
-                    if(neighbour.y === seen.bottom) {
-                        console.log('bottom')
-                        console.log(neighbour)
-                        seen.bottom += this.shwarfDom.height
-                    }
+            edge.forEach((plot) => {
+                this.shwarfDom.getVisitableNeighbours(plot).forEach((neighbour) => {
                     nEdge.set(hashPoint(neighbour), neighbour)
-                    if(step % 2) {
-                        nOdds++
-                    } else {
-                        nEvens++
-                    }
                 })
             })
 
             edge = nEdge
         }
+        return edge.size
+    }
 
-        return (nSteps % 2) ? nOdds : nEvens
+    cheat(): number {
+        const worldWidth = 131
+        const fromFirstToEdge = 65
+        const nSteps = 202300*worldWidth + fromFirstToEdge
+        const nWorlds = (nSteps - fromFirstToEdge) / worldWidth
+        const nTorlds = nWorlds / 2
+
+        const nDiamondsTotal = (4*nTorlds + 1)**2
+        const nDiamondsWhole = nDiamondsTotal / 2 + 0.5
+        const nDiamondsSplit = nDiamondsWhole - 1
+
+        const nDiamond65 = 4*(nTorlds**2 + nTorlds) + 1
+        const nDiamond64 = 4*(nTorlds**2)
+        
+        const nDnomiad = nDiamondsSplit / 2
+
+        const diamond64 = this.walk(fromFirstToEdge - 1)
+        const allDem64 = this.walk(fromFirstToEdge + worldWidth)
+        const dnomaid64 = allDem64 - diamond64
+        
+        const diamond65 = this.walk(fromFirstToEdge)
+        const allDem65 = this.walk(fromFirstToEdge + worldWidth + 1)
+        const dnomaid65 = allDem65 - diamond65
+        
+        return nDiamond64*diamond64 + nDiamond65*diamond65 + nDnomiad*(dnomaid64 + dnomaid65)
     }
 }
 
@@ -180,18 +139,15 @@ export default class SolverDay21 extends SolverBase<Shwarf> {
     }
 
     solvePartOne(input: Shwarf): Solvution {
-        console.log(input.toString())
         return new Solvution(
-            5//input.walk(64)
+            input.walk(64)
         )
     }
     
     solvePartTwo(input: Shwarf): Solvution {
-        input.startingLocation = new Point(-1, 65)
         return new Solvution(
-            input.walk(600) //input.walk(26_501_365)
+            input.cheat()
         )
     }
 
 }
-        
