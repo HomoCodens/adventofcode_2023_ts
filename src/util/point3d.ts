@@ -1,3 +1,5 @@
+import { sqrt } from "mathjs"
+
 export default class Point3D {
     constructor(public x: number, public y: number, public z: number) {}
     
@@ -25,7 +27,7 @@ export default class Point3D {
     scale(factor: number): Point3D {
         return new Point3D(this.x*factor, this.y*factor, this.z*factor)
     }
-
+    
     toArray(): number[] {
         return [this.x, this.y, this.z]
     }

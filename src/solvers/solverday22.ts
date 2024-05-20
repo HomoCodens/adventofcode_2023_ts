@@ -2,66 +2,61 @@ import Point3D from '../util/point3d'
 import SolverBase, { Solvution } from './solverbase'
 import * as maffs from 'mathjs'
 
+const numberInRange = (x: number, min: number, max: number) => 
+    x >= min && x <= max
 class Brik {
     public id: string = 'unidentifiedLyingObject'
+    public from: Point3D
+    public to: Point3D
+    public voxels: Point3D[]
     
-    get lowerLeftDown(): Point3D {
-        return new Point3D(
-                            Math.min(this.from.x, this.to.x),
-                            Math.min(this.from.y, this.to.y),
-                            Math.min(this.from.z, this.to.z)
-                        )
-    }
-    
-    get upperRightSkyward(): Point3D {
-        return new Point3D(
-                            Math.max(this.from.x, this.to.x),
-                            Math.max(this.from.y, this.to.y),
-                            Math.max(this.from.z, this.to.z)
-                        )
-    }
-
-    get unitVector(): number[] {
-        return maffs.subtract(
-            [this.upperRightSkyward.x, this.upperRightSkyward.y, this.upperRightSkyward.z],
-            [this.lowerLeftDown.x, this.lowerLeftDown.y, this.lowerLeftDown.z]
-        )
-    }
-
     get xAligned(): boolean {
-        return this.from.y === this.to.y
+        return this.from.x !== this.to.x
     }
 
-    get isVertical(): boolean {
+    get yAligned(): boolean {
+        return this.from.y !== this.to.y
+    }
+
+    get zAligned(): boolean {
         return this.from.z !== this.to.z
     }
+           
+    constructor(from: Point3D, to: Point3D) {
+        this.from = new Point3D(
+            Math.min(from.x, to.x),
+            Math.min(from.y, to.y),
+            Math.min(from.z, to.z),
+        )
 
-    get voxels(): Point3D[] {
-        let dx = this.to.x - this.from.x
-        // This is where he said 'eff it' and fully embraced the shittiness of this mess of code
-        if(dx > 0)
-            dx /= maffs.abs(dx)
+        this.to = new Point3D(
+            Math.max(from.x, to.x),
+            Math.max(from.y, to.y),
+            Math.max(from.z, to.z),
+        )
 
-        let dy = this.to.y - this.from.y
-        if(dy > 0)
-            dy /= maffs.abs(dy)
+        this.voxels = this.generateVoxels()
+    }
 
-        let dz = this.to.z - this.from.z
-        if(dz > 0)
-            dz /= maffs.abs(dz)
+    private generateVoxels(): Point3D[] {
+        let direction = new Point3D(1, 0, 0)
+        if(this.yAligned) {
+            direction = new Point3D(0, 1, 0)
+        }
+        if(this.zAligned) {
+            direction = new Point3D(0, 0, 1)
+        }
 
         let at = this.from.clooney()
         let out = []
         while(at.x <= this.to.x && at.y <= this.to.y && at.z <= this.to.z) {
             out.push(at)
-            at = new Point3D(at.x + dx, at.y + dy, at.z + dz)
+            at = at.add(direction)
         }
 
         return out
     }
-            
-    constructor(private from: Point3D, private to: Point3D) {}
-        
+
     static fromString(def: string): Brik {
         const [from, to] = def.split('~')
         return new Brik(Point3D.fromString(from), Point3D.fromString(to))
@@ -71,69 +66,17 @@ class Brik {
         return `${this.from.toWastl()}~${this.to.toWastl()}${this.id.length < 4 ? ` ${this.id}` : ''}`
     }
 
-    collinearXY(other: Brik): boolean {
-        if(this.xAligned !== other.xAligned) {
-            return false
-        }
-
-        if(this.xAligned) {
-            return this.from.y === other.from.y
-        }
-
-        return this.from.x === other.from.x
+    containsVoxelXY(voxel: Point3D): boolean {
+        return numberInRange(voxel.x, this.from.x, this.to.x) &&
+                numberInRange(voxel.y, this.from.y, this.to.y)
     }
     
     interseksXY(other: Brik): boolean {
-        if(this.collinearXY(other)) {
-            if(this.xAligned) {
-                return (other.lowerLeftDown.x >= this.lowerLeftDown.x && other.lowerLeftDown.x <= this.upperRightSkyward.x) ||
-                        (this.lowerLeftDown.x >= other.lowerLeftDown.x && this.lowerLeftDown.x <= other.upperRightSkyward.x)
-            } else {
-                return (other.lowerLeftDown.y >= this.lowerLeftDown.y && other.lowerLeftDown.y <= this.upperRightSkyward.y) ||
-                        (this.lowerLeftDown.y >= other.lowerLeftDown.y && this.lowerLeftDown.y <= other.upperRightSkyward.y)
-            }
-        }
-
-        const intersectionPoint = maffs.intersect(
-            [this.lowerLeftDown.x, this.lowerLeftDown.y],
-            [this.upperRightSkyward.x, this.upperRightSkyward.y],
-            [other.lowerLeftDown.x, other.lowerLeftDown.y],
-            [other.upperRightSkyward.x, other.upperRightSkyward.y]
-        )
-
-        if(intersectionPoint === null) {
-            return false
-        }
-
-        return this.lowerLeftDown.x <= Number(intersectionPoint[0]) && this.upperRightSkyward.x >= Number(intersectionPoint[0]) &&
-                this.lowerLeftDown.y <= Number(intersectionPoint[1]) && this.upperRightSkyward.y >= Number(intersectionPoint[1]) &&
-                other.lowerLeftDown.x <= Number(intersectionPoint[0]) && other.upperRightSkyward.x >= Number(intersectionPoint[0]) &&
-                other.lowerLeftDown.y <= Number(intersectionPoint[1]) && other.upperRightSkyward.y >= Number(intersectionPoint[1])
-
-        /*const L = maffs.round([[this.from.x - this.to.x, -(other.from.x - other.to.x)],
-                               [this.from.y - this.to.y, -(other.from.y - other.to.y)]])
-
-        const b = [other.from.x - this.from.x, other.from.y - this.from.y]
-        const [s, t] = maffs.lusolve(L, b)
-        const numberS = Number(s)
-        const numberT = Number(t)
-        
-        return numberS >= 0 && numberS <= 1 && numberT >= 0 && numberT <= 1*/
-    }
-    
-    compareTo(other: Brik): number {
-        // Large Language Dummy? (Please don't kill me, o machine overlords!)
-        const myLLD = this.lowerLeftDown
-        const otherLLD = other.lowerLeftDown
-        return myLLD.z === otherLLD.z ? 
-                    myLLD.y === otherLLD.y ? 
-                        otherLLD.x - myLLD.x : 
-                        otherLLD.y - myLLD.y : 
-                    otherLLD.z - myLLD.z
+        return other.voxels.some((v) => this.containsVoxelXY(v))
     }
     
     dropLikeABagOfFeathers(targetZ: number): void {
-        const dz = this.lowerLeftDown.z - targetZ
+        const dz = this.from.z - targetZ
         this.from.z -= dz
         this.to.z -= dz
     }
@@ -148,15 +91,13 @@ class BrikWorld {
     constructor(private bricks: Brik[]) {
         this.zSortBricks()
 
-        const minX = Math.min(0, ...this.bricks.map(({ lowerLeftDown }) => lowerLeftDown.x))
-        const maxX = Math.max(...this.bricks.map(({ upperRightSkyward }) => upperRightSkyward.x))
+        const maxX = Math.max(...this.bricks.map(({ to }) => to.x))
+        const maxY = Math.max(...this.bricks.map(({ to }) => to.y))
+        const maxZ = Math.max(...this.bricks.map(({ to }) => to.z))
 
-        const minY = Math.min(0, ...this.bricks.map(({ lowerLeftDown }) => lowerLeftDown.y))
-        const maxY = Math.max(...this.bricks.map(({ upperRightSkyward }) => upperRightSkyward.y))
-
-        this.width = maxX - minX + 1
-        this.depth = maxY - minY + 1
-        this.height = this.bricks[this.bricks.length - 1].upperRightSkyward.z
+        this.width = maxX + 1
+        this.depth = maxY + 1
+        this.height = maxZ + 1
     }
 
     toWastl(): string {
@@ -171,13 +112,13 @@ class BrikWorld {
                         )
 
         this.bricks.forEach((brick) => {
-            if(brick.isVertical) {
-                for(let z = brick.lowerLeftDown.z; z <= brick.upperRightSkyward.z; z++) {
-                    grid[z][brick.lowerLeftDown.y] = '#'
+            if(brick.zAligned) {
+                for(let z = brick.from.z; z <= brick.to.z; z++) {
+                    grid[z][brick.from[direction]] = '#'
                 }
             } else {
-                for(let j = brick.lowerLeftDown[direction]; j <= brick.upperRightSkyward[direction]; j++) {
-                    grid[brick.lowerLeftDown.z][j] = '#'
+                for(let j = brick.from[direction]; j <= brick.to[direction]; j++) {
+                    grid[brick.from.z][j] = '#'
                 }
             }
         })
@@ -186,8 +127,6 @@ class BrikWorld {
     }
 
     sideViews(): string {
-        const axisLabelPadding = Math.floor(this.width / 2)
-
         const sideViewX = this.sideViewRaw('x')
         const sideViewY = this.sideViewRaw('y')
         const lineNoLength = maffs.log10(this.height) + 1
@@ -208,65 +147,65 @@ class BrikWorld {
     }
 
     zSortBricks(): void {
-        this.bricks.sort((a, b) => a.lowerLeftDown.z - b.lowerLeftDown.z)
+        this.bricks.sort((a, b) => a.from.z - b.from.z)
     }
 
     settle(): void {
         this.zSortBricks()
-        this.bricks.forEach((brick: Brik, i: number) => {
-            
-            console.log(`\n\nNow Placing: ${brick.toWastl()}\n`)
-            //this.printPlacement(brick)
 
-            // yes, the order changes during the loop, but only for those with a z value
-            // LESS than the remaining bricks so it's fiiine
-            // also: yes, some smart data structure would be more efficient.
-            for(let ii = i - 1; ii >= 0; ii--) {
-                if(brick.interseksXY(this.bricks[ii])) {
-                    brick.dropLikeABagOfFeathers(this.bricks[ii].upperRightSkyward.z + 1)
-                    console.log(`what him interseks with ${this. bricks[ii]} and ends up on layer ${brick.lowerLeftDown.z}`)
-                    return
-                }
-            }
+        for(const [i, brick] of this.bricks.entries()) {
+            // console.log(`\n\nNow Placing: ${brick.toWastl()}\n`)
+            // this.printPlacement(brick)
             
-            brick.dropLikeABagOfFeathers(1)
-            console.log(`what him falls all the way down to layer 1`)
-        })
-        this.zSortBricks()
+            const bricksWhatCouldBlock = this.bricks.slice(0, i).filter((otherBrick) => brick.interseksXY(otherBrick))
+            if(bricksWhatCouldBlock.length === 0) {
+                brick.dropLikeABagOfFeathers(1)
+                // console.log(`what him falls all the way down to layer 1`)
+                // console.log(brick.toWastl())
+            } else {
+                const highestBrick = bricksWhatCouldBlock.sort((a, b) => b.to.z - a.to.z)[0]
+                brick.dropLikeABagOfFeathers(highestBrick.to.z + 1)
+                // console.log(`what him interseks with ${highestBrick.id} and ends up on layer ${brick.from.z}`)
+                // console.log(brick.toWastl())
+            }
+        }
+
+        return
     }
     
     getZappables(): Brik[] {
         return this.bricks.filter((brick) => {
-            console.log(`\nconsidering brick ${brick.id}`)
+            // console.log(`\nconsidering brick ${brick.id}`)
+            // this.printPlacement(brick)
             
             const hatBricks = this.getBricksRestingOn(brick)
-            console.log(`supporting ${hatBricks.length} many bricks: ${hatBricks.map(({id}) => id).join()}`)
+            // console.log(`supporting ${hatBricks.length} many bricks: ${hatBricks.map(({id}) => id).join()}`)
             if(hatBricks.length === 0) {
                 // lucky you, enjoy the view!
-                console.log(`nayt supporting nobody. verdict: ZAPPABLE!`)
+                // console.log(`nayt supporting nobody. verdict: ZAPPABLE!`)
                 return true
             }
             
-            const isOnlySupportingForSome = hatBricks.some((hatBrick) => this.getBricksSupporting(hatBrick).length === 1)
-            if(isOnlySupportingForSome) {
-                console.log(`is the only one supporting ${hatBricks.filter((hatBrick) => this.getBricksSupporting(hatBrick)).map(({id}) => id).join(',')} some. NOT ZAPPABLE!`)
-            } else {
-                console.log(`s all good man, all my hats are supported by some other guy. ZAPPABLE!`)
-            }
-            return !isOnlySupportingForSome
+            const bricksSupportedOnlyByBrick = hatBricks.filter((hatBrick) => this.getBricksSupporting(hatBrick).length === 1)
+            // if(bricksSupportedOnlyByBrick.length > 0) {
+                // console.log(`is the only one supporting ${bricksSupportedOnlyByBrick.map(({id}) => id).join(',')} some. NOT ZAPPABLE!`)
+            // } else {
+                // console.log(`s all good man, all my hats are supported by some other guy. ZAPPABLE!`)
+            // }
+            return bricksSupportedOnlyByBrick.length === 0
         })
     }
     
     getBricksRestingOn(brick: Brik): Brik[] {
         return this.bricks.filter((otherBrick) =>
-            otherBrick.lowerLeftDown.z === brick.upperRightSkyward.z + 1 &&
+            (otherBrick.from.z === brick.to.z + 1) &&
                 brick.interseksXY(otherBrick)
         )
     }
     
     getBricksSupporting(brick: Brik): Brik[] {
         return this.bricks.filter((otherBrick) => 
-            otherBrick.upperRightSkyward.z === brick.lowerLeftDown.z - 1 &&
+            (otherBrick.to.z === brick.from.z - 1) &&
                 brick.interseksXY(otherBrick)
         )        
     }
@@ -276,7 +215,7 @@ class BrikWorld {
     }
 
     printDiagnostics(zFrom: number, zTo: number): void {
-        const birks = this.bricks.filter(({ lowerLeftDown }) => lowerLeftDown.z >= zFrom && lowerLeftDown.z <= zTo)
+        const birks = this.bricks.filter(({ from }) => from.z >= zFrom && from.z <= zTo)
         console.log(birks.map((b) => b.toWastl()).join('\n'))
 
         const sideViewLiness = this.sideViews().split('\n')
@@ -284,8 +223,8 @@ class BrikWorld {
     }
 
     printPlacement(brock: Brik): void {
-        let grid = Array.seq(this.width)
-                        .map(() => new Array(this.depth).fill('.'))
+        let grid = Array.seq(this.depth)
+                        .map(() => new Array(this.width).fill('.'))
         brock.voxels.forEach(({x, y}) => grid[y][x] = brock.id.length < 2 ? brock.id : '#')
         console.log(grid.reverse().twoString())
     }
@@ -299,13 +238,7 @@ export default class SolverDay22 extends SolverBase<BrikWorld> {
     }
     
     solvePartOne(input: BrikWorld): Solvution {
-        input.labelBricks()
-        input.zSortBricks()
-        console.log(input.toWastl())
-        console.log(input.sideViews())
         input.settle()
-        console.log(input.sideViews())
-        input.printDiagnostics(0, 4)
         return new Solvution(
             input.getZappables().length
         )
