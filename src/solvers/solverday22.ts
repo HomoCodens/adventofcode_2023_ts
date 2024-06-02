@@ -4,8 +4,18 @@ import * as maffs from 'mathjs'
 
 const numberInRange = (x: number, min: number, max: number) => 
     x >= min && x <= max
+
+type BrikTree = {
+    [key in number]: {
+        id: number
+        parents: number[]
+        childs: number[]
+    }
+}
+
 class Brik {
     public id: string = 'unidentifiedLyingObject'
+    public numbericId: number
     public from: Point3D
     public to: Point3D
     public voxels: Point3D[]
@@ -22,7 +32,7 @@ class Brik {
         return this.from.z !== this.to.z
     }
            
-    constructor(from: Point3D, to: Point3D) {
+    constructor(from: Point3D, to: Point3D, id: number) {
         this.from = new Point3D(
             Math.min(from.x, to.x),
             Math.min(from.y, to.y),
@@ -36,6 +46,7 @@ class Brik {
         )
 
         this.voxels = this.generateVoxels()
+        this.numbericId = id
     }
 
     private generateVoxels(): Point3D[] {
@@ -57,9 +68,9 @@ class Brik {
         return out
     }
 
-    static fromString(def: string): Brik {
+    static fromString(def: string, id: number): Brik {
         const [from, to] = def.split('~')
-        return new Brik(Point3D.fromString(from), Point3D.fromString(to))
+        return new Brik(Point3D.fromString(from), Point3D.fromString(to), id)
     }
 
     toWastl(): string {
@@ -228,6 +239,52 @@ class BrikWorld {
         brock.voxels.forEach(({x, y}) => grid[y][x] = brock.id.length < 2 ? brock.id : '#')
         console.log(grid.reverse().twoString())
     }
+
+    toTree(): BrikTree {
+        const tree = {} as BrikTree
+        for(const brick of this.bricks) {
+            tree[brick.numbericId] = {
+                id: brick.numbericId,
+                childs: this.getBricksRestingOn(brick).map(({numbericId}) => numbericId),
+                parents: this.getBricksSupporting(brick).map(({numbericId}) => numbericId),
+            }
+        }
+
+        return tree
+    }
+
+    sumJainReactions(): number {
+        this.zSortBricks()
+        const tree = this.toTree()
+        return this.bricks.reduce((acc, { numbericId }) => {
+            const fallees = this.walkTree(tree, tree[numbericId].childs, new Set([numbericId]))
+            return acc + fallees
+        }, 0)
+    }
+
+    walkTree(tree: BrikTree, q: number[], clique: Set<number>): number {
+        let nuQ = new Set<number>()
+        const hasOutsiderParents = (id: number) => tree[id].parents.some((parent) => !clique.has(parent))
+
+        let fallees = 0
+        for(const brick of q) {
+            const brik = this.bricks.find(({ numbericId }) => numbericId === brick)
+            //console.log(brik?.toWastl())
+
+            // TODO: figure out why there were some few where !clique.has mattered
+            if(!hasOutsiderParents(brick) && !clique.has(brick)) {
+                tree[brick].childs.forEach((x) => nuQ.add(x))
+                clique.add(brick)
+                fallees++
+            }
+        }
+
+        if(nuQ.size === 0) {
+            return fallees
+        }
+
+        return fallees + this.walkTree(tree, [...nuQ.values()], clique)
+    }
 }
         
 export default class SolverDay22 extends SolverBase<BrikWorld> {
@@ -245,10 +302,21 @@ export default class SolverDay22 extends SolverBase<BrikWorld> {
     }
         
     solvePartTwo(input: BrikWorld): Solvution {
+        input.settle()
+        // const allTheZappables = input.getZappables()
+        // const tree = input.toTree()
+        // allTheZappables.forEach((brick) => {
+        //     const zappablesChainReaction = input.walkTree(tree, tree[brick.numbericId].childs, [brick.numbericId])
+        //     if(zappablesChainReaction > 0) {
+        //         console.log(`that ent right: ${brick.numbericId} has ${zappablesChainReaction} jains`)
+        //     }
+        // })
         return new Solvution(
             'Answer goes here'
         )
     }
         
 }
-        
+
+// lb: ~1300
+// ub: 68609
